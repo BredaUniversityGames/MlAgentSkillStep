@@ -102,5 +102,6 @@ while True:
 
     # Progress Environemt forward
     obs, rew, done, info = env.step(act)
+    print(info)
     clock.tick(60)
     actionFrame += 1
