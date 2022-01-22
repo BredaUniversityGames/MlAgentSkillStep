@@ -1,74 +1,72 @@
 import sys
-
 import gym
 import retro
 import retrowrapper
 import pygame
+import OpenGL.GL as gl
 
-
+from imgui.integrations.pygame import PygameRenderer
+import imgui
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
 
 
-class GameMatch:
+class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
-    def __init__(self,diff):
+    def __init__(self ,diff):
         self.difficulties = ["streetFighter-ppo-500k"]
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
         self.obs = self.env.reset()
         self.model = PPO.load(self.difficulties[diff])
-
-    def startRender(self):
         pygame.init()
         size = 800, 600
 
         pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
-
         imgui.create_context()
-        impl = PygameRenderer()
+        self.io = imgui.get_io()
+        self.io.display_size = size
 
-        io = imgui.get_io()
-        io.display_size = size
+        self.impl = PygameRenderer()
 
-        while 1:
+    def startRender(self):
+        rendering = True
+        while rendering:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-                impl.process_event(event)
+                self.impl.process_event(event)
 
             imgui.new_frame()
-
-            if imgui.begin_main_menu_bar():
-                if imgui.begin_menu("File", True):
-
-                    clicked_quit, selected_quit = imgui.menu_item(
-                        "Quit", 'Cmd+Q', False, True
-                    )
-
-                    if clicked_quit:
-                        exit(1)
-
-                    imgui.end_menu()
-                imgui.end_main_menu_bar()
-
-            # imgui.show_test_window()
-
-            imgui.begin("Custom window", True)
-            imgui.text("Bar")
-            imgui.text_colored("Eggs", 0.2, 1., 0.)
-            imgui.end()
+            self.on_frame()
 
             # note: cannot use screen.fill((1, 1, 1)) because pygame's screen
             #       does not support fill() on OpenGL sufraces
             gl.glClearColor(1, 1, 1, 1)
             gl.glClear(gl.GL_COLOR_BUFFER_BIT)
             imgui.render()
-            impl.render(imgui.get_draw_data())
+            self.impl.render(imgui.get_draw_data())
 
             pygame.display.flip()
+
+    def on_frame(self):
+        # if imgui.begin_main_menu_bar():
+        #     if imgui.begin_menu("File", True):
+        #         clicked_quit, selected_quit = imgui.menu_item(
+        #             "Quit", 'Cmd+Q', False, True
+        #         )
+        #         if clicked_quit:
+        #             exit(1)
+        #         imgui.end_menu()
+        #     imgui.end_main_menu_bar()
+        #imgui.show_test_window()
+
+        imgui.begin("Custom window", True)
+        imgui.text("Bar")
+        imgui.text_colored("Eggs", 0.2, 1., 0.)
+        imgui.end()
 
     def startGame(self):
         playing= True
