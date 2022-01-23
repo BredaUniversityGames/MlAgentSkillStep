@@ -19,138 +19,92 @@ class GameMatch:
         self.env = retro.make(self.env_id, state='2p', players=2)
         self.obs = self.env.reset()
         self.model = PPO.load(self.difficulties[diff])
+        self.matchNr = 0
+        self.actionFrame = 0
+        self.butts = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
+        self.action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    def getPlaying(self):
+        return self.matchNr == 2 and self.actionFrame >= 500
 
-    def startRender(self):
-        pygame.init()
-        size = 800, 600
+    def getMatchNumber(self):
+        return self.matchNr
 
-        pygame.display.set_mode(size, pygame.DOUBLEBUF | pygame.OPENGL | pygame.RESIZABLE)
+    def getObs(self):
+        return self.obs
 
-        imgui.create_context()
-        impl = PygameRenderer()
+    def closeMatch(self):
+        self.env.close()
 
-        io = imgui.get_io()
-        io.display_size = size
-
-        while 1:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-
-                impl.process_event(event)
-
-            imgui.new_frame()
-
-            if imgui.begin_main_menu_bar():
-                if imgui.begin_menu("File", True):
-
-                    clicked_quit, selected_quit = imgui.menu_item(
-                        "Quit", 'Cmd+Q', False, True
-                    )
-
-                    if clicked_quit:
-                        exit(1)
-
-                    imgui.end_menu()
-                imgui.end_main_menu_bar()
-
-            # imgui.show_test_window()
-
-            imgui.begin("Custom window", True)
-            imgui.text("Bar")
-            imgui.text_colored("Eggs", 0.2, 1., 0.)
-            imgui.end()
-
-            # note: cannot use screen.fill((1, 1, 1)) because pygame's screen
-            #       does not support fill() on OpenGL sufraces
-            gl.glClearColor(1, 1, 1, 1)
-            gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-            imgui.render()
-            impl.render(imgui.get_draw_data())
-
-            pygame.display.flip()
-
-    def startGame(self):
-        playing= True
-        displaying = False
-
-        pygame.init()
-        win = pygame.display.set_mode((800, 600))
+    def renderFrame(self, events):
 
         # j = pygame.joystick.Joystick(1)
         # j.init()
 
         clock = pygame.time.Clock()
 
-        butts = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
+        self.actions = set()
 
-        action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        actionFrame = 0
-        while playing:
+        # Display
 
-            actions = set()
+        # img = pygame.image.frombuffer(self.obs.tostring(), self.obs.shape[1::-1], "RGB")
+        # img = pygame.transform.scale(img, (800, 600))
+        # win.blit(img, (0, 0))
+        # pygame.display.flip()
 
-            # Display
-            if displaying :
-                img = pygame.image.frombuffer(self.obs.tostring(), self.obs.shape[1::-1], "RGB")
-                img = pygame.transform.scale(img, (800, 600))
-                win.blit(img, (0, 0))
-                pygame.display.flip()
+        # Control Events
 
-            # Control Events
+        pygame.event.pump()
+        keys = pygame.key.get_pressed()
 
-            pygame.event.pump()
-            keys = pygame.key.get_pressed()
+        for event in events:
+            if keys[pygame.K_RIGHT]:
+                self.actions.add('RIGHT')
+            if keys[pygame.K_LEFT]:
+                self.actions.add('LEFT')
+            if keys[pygame.K_DOWN]:
+                self.actions.add('DOWN')
+            if keys[pygame.K_UP]:
+                self.actions.add('UP')
 
-            for event in pygame.event.get():
+            if keys[pygame.K_z]:
+                self.actions.add('A')
+            if keys[pygame.K_x]:
+                self.actions.add('B')
+            if keys[pygame.K_c]:
+                self.actions.add('C')
+            if keys[pygame.K_a]:
+                self.actions.add('X')
+            if keys[pygame.K_s]:
+                self.actions.add('Y')
+            if keys[pygame.K_d]:
+                self.actions.add('Z')
 
-                if keys[pygame.K_RIGHT]:
-                    actions.add('RIGHT')
-                if keys[pygame.K_LEFT]:
-                    actions.add('LEFT')
-                if keys[pygame.K_DOWN]:
-                    actions.add('DOWN')
-                if keys[pygame.K_UP]:
-                    actions.add('UP')
+            for i, a in enumerate(self.butts):
+                if a in self.actions:
+                    self.action_array[i] = 1
+                else:
+                    self.action_array[i] = 0
 
-                if keys[pygame.K_z]:
-                    actions.add('A')
-                if keys[pygame.K_x]:
-                    actions.add('B')
-                if keys[pygame.K_c]:
-                    actions.add('C')
-                if keys[pygame.K_a]:
-                    actions.add('X')
-                if keys[pygame.K_s]:
-                    actions.add('Y')
-                if keys[pygame.K_d]:
-                    actions.add('Z')
+        # if actionFrame == 4:
+        #     actionFrame = 0
 
-                for i, a in enumerate(butts):
-                    if a in actions:
-                        action_array[i] = 1
-                    else:
-                        action_array[i] = 0
+        a2, _ = self.model.predict(self.obs)
+        a2 = a2.tolist()
 
-            # if actionFrame == 4:
-            #     actionFrame = 0
-            a2, _ = self.model.predict(self.obs)
-            a2 = a2.tolist()
+        act = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] + self.action_array
 
-            act = a2 + action_array
+        # for 2 Models
+        # a3, _ = model2.predict(obs)
+        # act = a2.tolist() + a3.tolist()
 
-            # for 2 Models
-            # a3, _ = model2.predict(obs)
-            # act = a2.tolist() + a3.tolist()
+        # Progress Environemt forward
+        self.obs, rew, done, info = self.env.step(act)
+        # if info['matches_won'] == 1 and self.actionFrame == 500:
+        #     displaying = True
+        # if info['matches_won'] == 2:
+        #     print(info['matches_won'])
+        #     playing = False
+        clock.tick(60)
+        self.actionFrame += 1
 
-            # Progress Environemt forward
-            self.obs, rew, done, info = self.env.step(act)
-            if info['matches_won'] == 1 and actionFrame == 500:
-                displaying = True
-            if info['matches_won'] == 2:
-                print(info['matches_won'])
-                playing = False
-            clock.tick(60)
-            actionFrame += 1
-        self.env.close()
