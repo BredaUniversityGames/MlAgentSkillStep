@@ -92,7 +92,7 @@ class GameMatch:
         a2, _ = self.model.predict(self.obs)
         a2 = a2.tolist()
 
-        act = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] + self.action_array
+        act = a2 + self.action_array
 
         # for 2 Models
         # a3, _ = model2.predict(obs)
