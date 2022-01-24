@@ -94,7 +94,6 @@ def main():
 
             fooimage = GL_Image(img, 800, 600)
             fooimage.draw((0, 0))
-
         clock.tick(30)
         pygame.display.flip()
         pygame.event.pump()
