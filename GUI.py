@@ -1,12 +1,11 @@
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
 from imgui.integrations.pygame import PygameRenderer
 import imgui
 
-def show_help_marker(desc):
 
+def show_help_marker(desc):
     imgui.text_disabled("(?)")
     if imgui.is_item_hovered():
         imgui.begin_tooltip()
@@ -14,9 +13,15 @@ def show_help_marker(desc):
         imgui.text_unformatted(desc)
         imgui.pop_text_wrap_pos()
         imgui.end_tooltip()
+
+
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
-    def __init__(self):
+    def __init__(self,callback):
+        self.callback = callback
+
+        self.opinion = [[]]
+
         self.ethnicity = ""
         self.nationality = ""
         self.survey = False
@@ -32,24 +37,50 @@ class GUI:
 
         self.state = 0
         self.round = 0
+        self.closed = False
 
         self.window_flags = 0
         self.window_flags |= imgui.WINDOW_NO_MOVE
         self.window_flags |= imgui.WINDOW_NO_COLLAPSE
 
+        self.id = 211
+
+    def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excelent"):
+        #init matrix answers
+        while len(questionAnswer) <= questionNR:
+            questionAnswer.append([])
+        while len(questionAnswer[questionNR]) < size:
+            questionAnswer[questionNR].append(False)
+
+        imgui.text(quant1)
+        for i in range(size):
+            imgui.same_line(60+i*25)
+            #Use push id to avoid unique labels
+            imgui.push_id(str(questionNR)+str(i))
+            clicked, questionAnswer[questionNR][i] = imgui.checkbox("", questionAnswer[questionNR][i])
+            imgui.pop_id()
+        imgui.same_line()
+        imgui.text(quant2)
+
     def getUsername(self):
         return self.username
 
     def nextUI(self):
+        self.closed = False
         if self.state == 1 and self.round < 4:
-            self.round+=1
+            self.round += 1
+            self.opinion.append([])
         else:
-            self.state+=1
+            self.state += 1
+
+    def closeUI(self):
+        self.callback()
+        self.closed = True
 
     def displayLogin(self):
         imgui.set_next_window_size(800, 600)
         imgui.set_next_window_position(0, 0)
-        imgui.begin("User Information", closable=False, flags=self.window_flags )
+        imgui.begin("User Information", closable=False, flags=self.window_flags)
         imgui.text("Name")
         clicked, self.username = imgui.input_text(
             label="Name", value=self.username, buffer_length=64
@@ -86,7 +117,8 @@ class GUI:
             buffer_length=64,
             flags=imgui.INPUT_TEXT_CHARS_DECIMAL,
         )
-        clicked, self.GDPR = imgui.checkbox(label="Agree with the data processing mentioned at: https://bit.ly/MGTO2022", state=self.GDPR)
+        clicked, self.GDPR = imgui.checkbox(
+            label="Agree with the data processing mentioned at: https://bit.ly/MGTO2022", state=self.GDPR)
 
         clicked, self.anon = imgui.checkbox(label="Remain anonymous", state=self.anon)
 
@@ -97,36 +129,62 @@ class GUI:
         imgui.same_line(150)
         if imgui.button("Start Survey"):
             self.survey = True
+            self.closeUI()
         imgui.end()
 
     def displayQuestionary(self):
-        imgui.set_next_window_size(0, 0, condition=imgui.FIRST_USE_EVER)
-        imgui.begin("Questionary " + str(self.round+1) + "/5", closable=False, flags=self.window_flags )
-        imgui.text("Bar")
+        #Create this rounds answers dimension
 
-        clicked, self.widgets_basic_radio_button = imgui.radio_button("radio a", self.widgets_basic_radio_button)
-        imgui.same_line()
-        clicked, self.widgets_basic_radio_button = imgui.radio_button("radio b", self.widgets_basic_radio_button)
-        imgui.same_line()
-        clicked, self.widgets_basic_radio_button = imgui.radio_button("radio c", self.widgets_basic_radio_button)
-        imgui.text_colored("Eggs", 0.2, 1., 0.)
+
+        imgui.set_next_window_size(800, 600)
+        imgui.set_next_window_position(0, 0)
+        imgui.begin("Questionary " + str(self.round + 1) + "/5", closable=False, flags=self.window_flags)
+
+        imgui.text("How well did the NPC attack compared to you")
+        self.showLikertScale(self.opinion[self.round], 7, 0)
+
+        imgui.text("How well did the NPC defend compared to you")
+        self.showLikertScale(self.opinion[self.round], 7, 1)
+
+        imgui.text("How well did the NPC move compared to you")
+        self.showLikertScale(self.opinion[self.round], 7, 2)
+
+        show, _ = imgui.collapsing_header("Optional Questions")
+        if show:
+            imgui.text("How passive or aggresive was the NPC")
+            self.showLikertScale(self.opinion[self.round], 7, 3, "Passive", "Aggresive")
+
+            imgui.text("How well did the NPC move compared to you")
+            self.showLikertScale(self.opinion[self.round], 7, 4)
+            imgui.text("How delayed or reactive was the NPC")
+            self.showLikertScale(self.opinion[self.round], 7, 5, "Delayed", "Reactive")
+            imgui.text("How humanlike was the NPC")
+            self.showLikertScale(self.opinion[self.round], 7, 6, "Human", "Inhuman")
+
+        imgui.text("")
+        imgui.text("")
+
+        imgui.same_line(200)
+        if imgui.button("Proceed"):
+            self.nextUI()
         imgui.end()
 
     def displayThanks(self):
-        imgui.begin("Thank you", closable=False, flags=self.window_flags )
+        imgui.set_next_window_size(800, 600)
+        imgui.set_next_window_position(0, 0)
+        imgui.begin("Thank you", closable=False, flags=self.window_flags)
         imgui.text("Bar")
         imgui.text_colored("Eggs", 0.2, 1., 0.)
         imgui.end()
 
+
+
     def on_frame(self):
+        # print(self.opinion)
+        if self.closed: return
         if self.state == 1:
             self.displayQuestionary()
-        if self.state == 0:
+        elif self.state == 0:
             self.displayLogin()
         else:
             self.displayThanks()
-
-
-
-
-

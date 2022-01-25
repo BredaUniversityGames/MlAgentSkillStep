@@ -24,6 +24,18 @@ class GameMatch:
         self.butts = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
         self.action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        skipFirst = True
+        while skipFirst:
+            a2, _ = self.model.predict(self.obs)
+            a2 = a2.tolist()
+
+            act = a2 + self.action_array
+            self.obs, rew, done, info = self.env.step(act)
+            if info['matches_won'] == 1 and self.actionFrame == 500:
+                skipFirst = False
+            self.actionFrame += 1
+
+
     def getPlaying(self):
         return self.matchNr == 2 and self.actionFrame >= 500
 
@@ -41,7 +53,6 @@ class GameMatch:
         # j = pygame.joystick.Joystick(1)
         # j.init()
 
-        clock = pygame.time.Clock()
 
         self.actions = set()
 
@@ -105,6 +116,5 @@ class GameMatch:
         # if info['matches_won'] == 2:
         #     print(info['matches_won'])
         #     playing = False
-        clock.tick(60)
         self.actionFrame += 1
 

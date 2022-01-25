@@ -13,6 +13,11 @@ import imgui
 from GameMatch import GameMatch
 from OpenGLLoader import GL_Image
 
+running = True
+logIn = True
+stage = 0
+matchInProgress = False
+enableUI = True
 
 def initializeDisplay(w, h):
     pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT | pygame.RESIZABLE)
@@ -48,13 +53,13 @@ def render_init(w,h):
 
     initializeDisplay(bestx, besty)
 
+def uiNextHandler():
+    global matchInProgress
+    print("called")
+    matchInProgress = not matchInProgress
 
+def main2():
 
-def main():
-    running = True
-    logIn = True
-    stage = 0
-    matchInProgress = False
 
     render_init(800, 600)
     io = imgui.get_io()
@@ -76,7 +81,7 @@ def main():
                 impl.process_event(event)
             imgui.new_frame()
             gui.on_frame()
-            imgui.show_test_window()
+            #imgui.show_test_window()
             imgui.render()
             impl.render(imgui.get_draw_data())
         if matchInProgress:
@@ -91,7 +96,7 @@ def main():
             img = np.insert(img, 3, 255, axis=2)
             #img = np.flip(img,2)
             img = np.swapaxes(img,0,1)
-
+            print("da")
             fooimage = GL_Image(img, 800, 600)
             fooimage.draw((0, 0))
         clock.tick(30)
@@ -99,9 +104,72 @@ def main():
         pygame.event.pump()
     print("result: " + str(clock.get_fps()) + " FPS")
 
+def main():
+    render_init(800, 600)
+    io = imgui.get_io()
+    io.display_size = (800, 600)
+
+    impl = PygameRenderer()
+    count = 0
+    clock = pygame.time.Clock()
+    glLoadIdentity()
+    while running:
+        count+=1
+
+
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                sys.exit()
+            # if you don't wait one frame until you process_event the render will crash
+            if count > 1: impl.process_event(event)
+        if matchInProgress:
+            match.renderFrame(events)
+            img = match.getObs()
+            img = pygame.image.frombuffer(img.tostring(), img.shape[1::-1], "RGB")
+            img = pygame.transform.scale(img, (800, 600))
+            # numpy.shape(pygame.surfarray.array3d(img))
+            img = pygame.surfarray.array3d(img)
+            img = np.insert(img, 3, 255, axis=2)
+            #img = np.flip(img,2)
+            #glClearColor(1, 1, 1, 1)
+            img = np.swapaxes(img, 0, 1)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        if matchInProgress:
+            fooimage = GL_Image(img, 800, 600)
+            fooimage.draw((0, 0))
+        imgui.new_frame()
+        gui.on_frame()
+        clock.tick()
+        imgui.render()
+        impl.render(imgui.get_draw_data())
+        pygame.display.flip()
+        pygame.event.pump()
+    print("result: " + str(clock.get_fps()) + " FPS")
+toggle = True
+def on_frameSuccess():
+    global toggle
+    # if imgui.begin_main_menu_bar():
+    #     if imgui.begin_menu("File", True):
+    #         clicked_quit, selected_quit = imgui.menu_item(
+    #             "Quit", 'Cmd+Q', False, True
+    #         )
+    #         if clicked_quit:
+    #             exit(1)
+    #         imgui.end_menu()
+    #     imgui.end_main_menu_bar()
+    #imgui.show_test_window()
+    if toggle:
+        imgui.begin("Custom window", True)
+        imgui.text("Bar")
+        imgui.text_colored("Eggs", 0.2, 1., 0.)
+        if imgui.button("Proceed"):
+            toggle = False
+        imgui.end()
+
 if __name__ == "__main__":
     match = GameMatch(0)
-    gui = GUI()
+    gui = GUI(uiNextHandler)
     main()
 
 
