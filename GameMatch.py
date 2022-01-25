@@ -13,8 +13,11 @@ from stable_baselines3.common.env_util import make_vec_env
 
 class GameMatch:
     # diff - a number from 0 to 4 representing the level of difficulty
-    def __init__(self,diff):
-        self.difficulties = ["streetFighter-ppo-500k"]
+    def __init__(self,diff,callback):
+        self.callback = callback
+
+        self.difficulties = ["streetFighter-ppo-500k","streetFighter-ppo-100k"]
+
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
         self.obs = self.env.reset()
@@ -24,6 +27,9 @@ class GameMatch:
         self.butts = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
         self.action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.enemyWon = 0
+        self.matchesWon = 0
+        self.ended = False
         skipFirst = True
         while skipFirst:
             a2, _ = self.model.predict(self.obs)
@@ -31,8 +37,10 @@ class GameMatch:
 
             act = a2 + self.action_array
             self.obs, rew, done, info = self.env.step(act)
+            self.enemyWon = info['enemy_matches_won']
             if info['matches_won'] == 1 and self.actionFrame == 500:
                 skipFirst = False
+                self.matchesWon = 1
             self.actionFrame += 1
 
 
@@ -49,7 +57,8 @@ class GameMatch:
         self.env.close()
 
     def renderFrame(self, events):
-
+        if self.ended:
+            return
         # j = pygame.joystick.Joystick(1)
         # j.init()
 
@@ -113,8 +122,13 @@ class GameMatch:
         self.obs, rew, done, info = self.env.step(act)
         # if info['matches_won'] == 1 and self.actionFrame == 500:
         #     displaying = True
-        # if info['matches_won'] == 2:
-        #     print(info['matches_won'])
-        #     playing = False
+        if info['matches_won'] == 2:
+            self.ended = True
+            self.env.close()
+            self.callback(1)
+        elif info['enemy_matches_won'] == self.enemyWon+1:
+            self.ended = True
+            self.env.close()
+            self.callback(0)
         self.actionFrame += 1
 

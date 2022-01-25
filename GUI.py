@@ -67,7 +67,7 @@ class GUI:
 
     def nextUI(self):
         self.closed = False
-        if self.state == 1 and self.round < 4:
+        if self.state == 1 and self.round <= 4:
             self.round += 1
             self.opinion.append([])
         else:
@@ -166,7 +166,7 @@ class GUI:
 
         imgui.same_line(200)
         if imgui.button("Proceed"):
-            self.nextUI()
+            self.closeUI()
         imgui.end()
 
     def displayThanks(self):

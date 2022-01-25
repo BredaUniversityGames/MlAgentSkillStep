@@ -18,7 +18,9 @@ logIn = True
 stage = 0
 matchInProgress = False
 enableUI = True
-
+round = 0
+match = None
+gui = None
 def initializeDisplay(w, h):
     pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT | pygame.RESIZABLE)
     imgui.create_context()
@@ -57,6 +59,7 @@ def uiNextHandler():
     global matchInProgress
     print("called")
     matchInProgress = not matchInProgress
+    print("called Next Game" + str(matchInProgress))
 
 def main2():
 
@@ -105,6 +108,9 @@ def main2():
     print("result: " + str(clock.get_fps()) + " FPS")
 
 def main():
+    global match
+    global gui
+
     render_init(800, 600)
     io = imgui.get_io()
     io.display_size = (800, 600)
@@ -146,29 +152,19 @@ def main():
         pygame.display.flip()
         pygame.event.pump()
     print("result: " + str(clock.get_fps()) + " FPS")
-toggle = True
-def on_frameSuccess():
-    global toggle
-    # if imgui.begin_main_menu_bar():
-    #     if imgui.begin_menu("File", True):
-    #         clicked_quit, selected_quit = imgui.menu_item(
-    #             "Quit", 'Cmd+Q', False, True
-    #         )
-    #         if clicked_quit:
-    #             exit(1)
-    #         imgui.end_menu()
-    #     imgui.end_main_menu_bar()
-    #imgui.show_test_window()
-    if toggle:
-        imgui.begin("Custom window", True)
-        imgui.text("Bar")
-        imgui.text_colored("Eggs", 0.2, 1., 0.)
-        if imgui.button("Proceed"):
-            toggle = False
-        imgui.end()
+
+def matchEndedHandler(whoWon):
+    global round
+    global matchInProgress
+    global match
+    matchInProgress = False
+    gui.nextUI()
+    print(whoWon)
+    round += 1
+    match = GameMatch(1,matchEndedHandler)
 
 if __name__ == "__main__":
-    match = GameMatch(0)
+    match = GameMatch(0,matchEndedHandler)
     gui = GUI(uiNextHandler)
     main()
 
