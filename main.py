@@ -57,55 +57,9 @@ def render_init(w,h):
 
 def uiNextHandler():
     global matchInProgress
-    print("called")
-    matchInProgress = not matchInProgress
-    print("called Next Game" + str(matchInProgress))
+    if (round<5):
+        matchInProgress = not matchInProgress
 
-def main2():
-
-
-    render_init(800, 600)
-    io = imgui.get_io()
-    io.display_size = (800, 600)
-
-    impl = PygameRenderer()
-    image = np.array([[[255, 0, 0, 255], [255, 0, 0, 255],[255, 0, 0, 255], [255, 0, 0, 255]], [[255, 0, 0, 255], [255, 0, 0, 255],[255, 0, 0, 255], [255, 0, 0, 255]], [[255, 0, 0, 255], [255, 0, 0, 255],[255, 0, 0, 255], [255, 0, 0, 255]], [[255, 0, 0, 255], [255, 0, 0, 255],[255, 0, 0, 255], [255, 0, 0, 255]]])
-
-
-    clock = pygame.time.Clock()
-    glLoadIdentity()
-    while running:
-        events = pygame.event.get()
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        if not matchInProgress:
-            for event in events:
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                impl.process_event(event)
-            imgui.new_frame()
-            gui.on_frame()
-            #imgui.show_test_window()
-            imgui.render()
-            impl.render(imgui.get_draw_data())
-        if matchInProgress:
-            match.renderFrame(events)
-            img = match.getObs()
-            #print(np.shape(img))
-
-            img = pygame.image.frombuffer(img.tostring(), img.shape[1::-1], "RGB")
-            img = pygame.transform.scale(img, (800, 600))
-            # numpy.shape(pygame.surfarray.array3d(img))
-            img = pygame.surfarray.array3d(img)
-            img = np.insert(img, 3, 255, axis=2)
-            #img = np.flip(img,2)
-            img = np.swapaxes(img,0,1)
-            print("da")
-            fooimage = GL_Image(img, 800, 600)
-            fooimage.draw((0, 0))
-        clock.tick(30)
-        pygame.display.flip()
-        pygame.event.pump()
-    print("result: " + str(clock.get_fps()) + " FPS")
 
 def main():
     global match
@@ -126,6 +80,7 @@ def main():
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
+                print("result: " + str(clock.get_fps()) + " FPS")
                 sys.exit()
             # if you don't wait one frame until you process_event the render will crash
             if count > 1: impl.process_event(event)
@@ -151,7 +106,6 @@ def main():
         impl.render(imgui.get_draw_data())
         pygame.display.flip()
         pygame.event.pump()
-    print("result: " + str(clock.get_fps()) + " FPS")
 
 def matchEndedHandler(whoWon):
     global round
@@ -161,7 +115,8 @@ def matchEndedHandler(whoWon):
     gui.nextUI()
     print(whoWon)
     round += 1
-    match = GameMatch(1,matchEndedHandler)
+    if (round<5):
+        match = GameMatch(round,matchEndedHandler)
 
 if __name__ == "__main__":
     match = GameMatch(0,matchEndedHandler)

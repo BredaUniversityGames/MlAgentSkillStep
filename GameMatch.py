@@ -16,7 +16,7 @@ class GameMatch:
     def __init__(self,diff,callback):
         self.callback = callback
 
-        self.difficulties = ["streetFighter-ppo-500k","streetFighter-ppo-100k"]
+        self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","streetFighter-ppo-400k","streetFighter-ppo-600k","streetFighter-ppo-700k"]
 
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
@@ -120,6 +120,7 @@ class GameMatch:
 
         # Progress Environemt forward
         self.obs, rew, done, info = self.env.step(act)
+
         # if info['matches_won'] == 1 and self.actionFrame == 500:
         #     displaying = True
         if info['matches_won'] == 2:
