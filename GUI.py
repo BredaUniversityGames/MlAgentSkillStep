@@ -250,7 +250,6 @@ class GUI:
         for i in range(6):
             answeredQuestion = False
             for j in range(7):
-                print (str(i) + " " + str(j))
                 if questions[i][j]:
                     answeredQuestion = True
                     break
