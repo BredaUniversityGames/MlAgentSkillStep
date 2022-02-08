@@ -46,6 +46,14 @@ class GUI:
 
         self.id = 211
 
+    def checkRadioButton(self,questionAnswer, questionNR, size, itemPoz):
+        onlyAnswer = True
+        for i in range(size):
+            if questionAnswer[questionNR][i] == True and i!=itemPoz:
+                onlyAnswer = False
+                return onlyAnswer
+        return onlyAnswer
+
     def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excelent"):
         #init matrix answers
         while len(questionAnswer) <= questionNR:
@@ -59,7 +67,9 @@ class GUI:
             #Use push id to avoid unique labels
             imgui.push_id(str(questionNR)+str(i))
             clicked, questionAnswer[questionNR][i] = imgui.checkbox("", questionAnswer[questionNR][i])
-
+            if clicked:
+                if not self.checkRadioButton(questionAnswer, questionNR, size, i):
+                    questionAnswer[questionNR][i] = False
             imgui.pop_id()
         imgui.same_line()
         imgui.text(quant2)
