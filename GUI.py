@@ -19,9 +19,13 @@ def show_help_marker(desc):
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self,callback):
+        maxRounds = 5
+        nrQuestionsInRound = 12
+        pointsOnScale = 7
+
         self.callback = callback
 
-        self.opinion = [[]]
+        self.opinion = []
 
         self.ethnicity = ""
         self.nationality = ""
@@ -45,6 +49,15 @@ class GUI:
         self.window_flags |= imgui.WINDOW_NO_COLLAPSE
 
         self.id = 211
+        self.initAnswerMatrix(maxRounds,nrQuestionsInRound,pointsOnScale)
+
+    def initAnswerMatrix(self,rounds,nrQuestions,nrPointsOnScale):
+        for i in range(rounds):
+            self.opinion.append([])
+            for j in range(nrQuestions):
+                self.opinion[i].append([])
+                for k in range(nrPointsOnScale):
+                    self.opinion[i][j].append(False)
 
     def checkRadioButton(self,questionAnswer, questionNR, size, itemPoz):
         onlyAnswer = True
@@ -55,11 +68,6 @@ class GUI:
         return onlyAnswer
 
     def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excelent"):
-        #init matrix answers
-        while len(questionAnswer) <= questionNR:
-            questionAnswer.append([])
-        while len(questionAnswer[questionNR]) < size:
-            questionAnswer[questionNR].append(False)
 
         imgui.text(quant1)
         for i in range(size):
@@ -156,46 +164,47 @@ class GUI:
         imgui.begin("Questionnaire " + str(self.round + 1) + "/5", closable=False, flags=self.window_flags)
 
         imgui.text("Did you enjoy competing against this NPC?")
-        self.showLikertScale(self.opinion[self.round], 7, 9, "Hated it", "Enjoyed it")
+        self.showLikertScale(self.opinion[self.round], 7, 0, "Hated it", "Enjoyed it")
 
         imgui.text("How skilled was the NPC?")
-        self.showLikertScale(self.opinion[self.round], 7, 10)
-
-        imgui.text("How skilled were you?")
-        self.showLikertScale(self.opinion[self.round], 7, 11)
-
-        imgui.text("How well did the NPC attack compared to you?")
-        self.showLikertScale(self.opinion[self.round], 7, 0)
-
-        imgui.text("How well did the NPC defend compared to you?")
         self.showLikertScale(self.opinion[self.round], 7, 1)
 
-        imgui.text("How well did the NPC move compared to you?")
+        imgui.text("How skilled were you?")
         self.showLikertScale(self.opinion[self.round], 7, 2)
+
+        imgui.text("How well did the NPC attack compared to you?")
+        self.showLikertScale(self.opinion[self.round], 7, 3)
+
+        imgui.text("How well did the NPC defend compared to you?")
+        self.showLikertScale(self.opinion[self.round], 7, 4)
+
+        imgui.text("How well did the NPC move compared to you?")
+        self.showLikertScale(self.opinion[self.round], 7, 5)
 
 
 
         show, _ = imgui.collapsing_header("Optional Questions")
         if show:
             imgui.text("How passive or aggressive was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 3, "Passive", "Aggressive")
+            self.showLikertScale(self.opinion[self.round], 7, 6, "Passive", "Aggressive")
 
             imgui.text("How well did the NPC riposte compared to you?")
-            self.showLikertScale(self.opinion[self.round], 7, 4)
+            self.showLikertScale(self.opinion[self.round], 7, 7)
             imgui.text("How delayed or reactive was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 5, "Delayed", "Reactive")
+            self.showLikertScale(self.opinion[self.round], 7, 8, "Delayed", "Reactive")
             imgui.text("How humanlike was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 6, "Human", "Inhuman")
+            self.showLikertScale(self.opinion[self.round], 7, 9, "Human", "Inhuman")
             imgui.text("How predictable was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 7, "Predictable", "Unpredictable")
+            self.showLikertScale(self.opinion[self.round], 7, 10, "Predictable", "Unpredictable")
             imgui.text("Was the NPC behaviour exploitable?")
-            self.showLikertScale(self.opinion[self.round], 7, 8, "Exploitable", "Adaptive")
+            self.showLikertScale(self.opinion[self.round], 7, 11, "Exploitable", "Adaptive")
         imgui.text("")
         imgui.text("")
 
         imgui.same_line(200)
         if imgui.button("Proceed"):
-            self.closeUI()
+            if self.validateAnswers(self.opinion[self.round]):
+                self.closeUI()
         imgui.end()
 
     def displayThanks(self):
@@ -235,3 +244,17 @@ class GUI:
             self.displayLogin()
         else:
             self.displayThanks()
+
+    def validateAnswers(self, questions):
+        allMandatoryQuestionsAnswered = True
+        for i in range(6):
+            answeredQuestion = False
+            for j in range(7):
+                print (str(i) + " " + str(j))
+                if questions[i][j]:
+                    answeredQuestion = True
+                    break
+            if not answeredQuestion:
+                allMandatoryQuestionsAnswered = False
+                return allMandatoryQuestionsAnswered
+        return allMandatoryQuestionsAnswered
