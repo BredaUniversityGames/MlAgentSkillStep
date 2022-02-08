@@ -59,6 +59,7 @@ class GUI:
             #Use push id to avoid unique labels
             imgui.push_id(str(questionNR)+str(i))
             clicked, questionAnswer[questionNR][i] = imgui.checkbox("", questionAnswer[questionNR][i])
+
             imgui.pop_id()
         imgui.same_line()
         imgui.text(quant2)
@@ -131,8 +132,9 @@ class GUI:
             self.tutorial = True
         imgui.same_line(200)
         if imgui.button("Start Survey"):
-            self.survey = True
-            self.closeUI()
+            if self.GDPR and self.gender!="" and self.nationality!="" and self.ethnicity!="" and self.noh!="" and self.age!="":
+                self.survey = True
+                self.closeUI()
         imgui.end()
 
     def displayQuestionary(self):
