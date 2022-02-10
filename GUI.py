@@ -5,7 +5,7 @@ from OpenGL.GLU import *
 
 from imgui.integrations.pygame import PygameRenderer
 import imgui
-
+from datetime import datetime
 
 def show_help_marker(desc):
     imgui.text_disabled("(?)")
@@ -87,16 +87,17 @@ class GUI:
 
     def nextUI(self):
         self.closed = False
-        if self.state == 1 and self.round <= 4:
+        if self.state == 1 and self.round < 4:
             self.round += 1
-            self.opinion.append([])
         else:
             self.state += 1
 
     def closeUI(self):
+
         self.callback()
         self.closed = True
         if self.round == 4:
+            self.nextUI()
             self.closed = False
 
     def displayLogin(self):
@@ -152,6 +153,7 @@ class GUI:
         if imgui.button("Start Survey"):
             if self.GDPR and self.gender!="" and self.nationality!="" and self.ethnicity!="" and self.noh!="" and self.age!="":
                 self.survey = True
+                self.saveDataToCSV()
                 self.closeUI()
         imgui.end()
 
@@ -212,6 +214,7 @@ class GUI:
         imgui.set_next_window_position(0, 0)
         imgui.begin("Thank you", closable=False, flags=self.window_flags)
         imgui.text("Thank You!")
+        imgui.text("This is the end of the survey")
         imgui.text("")
         if imgui.button("Exit"):
             self.saveDataToCSV()
@@ -220,18 +223,21 @@ class GUI:
 
     def saveDataToCSV(self):
         f = open("MLSkillStepData.csv", "a")
-        stringData= str(self.username) + ";" +str(self.age) + ";" +str(self.gender) + ";" +str(self.nationality) + ";" +str(self.ethnicity) + ";" +str(self.noh)
+        if self.username == "" or self.anon:
+            self.username = datetime.now()
+        stringData= "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh)
         for round in self.opinion:
             for question in round:
                 answered = False
                 for i in range(0,7):
                     if question[i] == True:
-                        stringData+=";"+ str(i)
+                        stringData+=","+ str(i)
                         answered = True
                 if answered == False:
-                    stringData += ";"
-
+                    stringData += ",-1"
+        print("writing1")
         f.write(stringData)
+        print("writing2")
         f.close()
 
 

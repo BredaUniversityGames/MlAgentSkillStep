@@ -38,7 +38,7 @@ class GameMatch:
             act = a2 + self.action_array
             self.obs, rew, done, info = self.env.step(act)
             self.enemyWon = info['enemy_matches_won']
-            if info['matches_won'] == 1 and self.actionFrame == 500:
+            if info['matches_won'] == 1 and self.actionFrame >= 500:
                 skipFirst = False
                 self.matchesWon = 1
             self.actionFrame += 1
