@@ -1,3 +1,4 @@
+import random
 import sys
 
 from GUI import GUI
@@ -21,6 +22,8 @@ enableUI = True
 round = 0
 match = None
 gui = None
+matches = [True,False,False,False,False]
+
 def initializeDisplay(w, h):
     pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT | pygame.RESIZABLE)
     imgui.create_context()
@@ -111,13 +114,25 @@ def matchEndedHandler(whoWon):
     global round
     global matchInProgress
     global match
-    matchInProgress = False
-    gui.nextUI()
-    print(whoWon)
-    round += 1
-    if (round<5):
-        match = GameMatch(round,matchEndedHandler)
+    global matches
 
+    matchInProgress = False
+    round += 1
+    nextRound = 0
+    if (round<4):
+
+        notFoundNext = True
+        while (notFoundNext):
+            nextRound = random.randint(1,3)
+            if (matches[nextRound] == False):
+                notFoundNext = False
+                matches[nextRound] = True
+        gui.setMatchRoundId(nextRound)
+        match = GameMatch(nextRound, matchEndedHandler)
+    elif (round<5):
+        gui.setMatchRoundId(round)
+        match = GameMatch(round,matchEndedHandler)
+    gui.nextUI()
 if __name__ == "__main__":
     match = GameMatch(0,matchEndedHandler)
     gui = GUI(uiNextHandler)

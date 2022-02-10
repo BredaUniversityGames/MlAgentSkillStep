@@ -43,6 +43,8 @@ class GUI:
         self.state = 0
         self.round = 0
         self.closed = False
+        self.match = 0
+        self.nextMatch = 0
 
         self.window_flags = 0
         self.window_flags |= imgui.WINDOW_NO_MOVE
@@ -50,6 +52,9 @@ class GUI:
 
         self.id = 211
         self.initAnswerMatrix(maxRounds,nrQuestionsInRound,pointsOnScale)
+
+    def setMatchRoundId(self, matchRoundId):
+        self.nextMatch = matchRoundId
 
     def initAnswerMatrix(self,rounds,nrQuestions,nrPointsOnScale):
         for i in range(rounds):
@@ -91,9 +96,12 @@ class GUI:
             self.round += 1
         else:
             self.state += 1
+        if self.state == 2:
+            self.saveDataToCSV()
+
 
     def closeUI(self):
-
+        self.match = self.nextMatch
         self.callback()
         self.closed = True
         if self.round == 4:
@@ -153,59 +161,57 @@ class GUI:
         if imgui.button("Start Survey"):
             if self.GDPR and self.gender!="" and self.nationality!="" and self.ethnicity!="" and self.noh!="" and self.age!="":
                 self.survey = True
-                self.saveDataToCSV()
                 self.closeUI()
         imgui.end()
 
     def displayQuestionary(self):
         #Create this rounds answers dimension
 
-
         imgui.set_next_window_size(800, 600)
         imgui.set_next_window_position(0, 0)
         imgui.begin("Questionnaire " + str(self.round + 1) + "/5", closable=False, flags=self.window_flags)
 
         imgui.text("Did you enjoy competing against this NPC?")
-        self.showLikertScale(self.opinion[self.round], 7, 0, "Hated it", "Enjoyed it")
+        self.showLikertScale(self.opinion[self.match], 7, 0, "Hated it", "Enjoyed it")
 
         imgui.text("How skilled was the NPC?")
-        self.showLikertScale(self.opinion[self.round], 7, 1)
+        self.showLikertScale(self.opinion[self.match], 7, 1)
 
         imgui.text("How skilled were you?")
-        self.showLikertScale(self.opinion[self.round], 7, 2)
+        self.showLikertScale(self.opinion[self.match], 7, 2)
 
         imgui.text("How well did the NPC attack compared to you?")
-        self.showLikertScale(self.opinion[self.round], 7, 3)
+        self.showLikertScale(self.opinion[self.match], 7, 3)
 
         imgui.text("How well did the NPC defend compared to you?")
-        self.showLikertScale(self.opinion[self.round], 7, 4)
+        self.showLikertScale(self.opinion[self.match], 7, 4)
 
         imgui.text("How well did the NPC move compared to you?")
-        self.showLikertScale(self.opinion[self.round], 7, 5)
+        self.showLikertScale(self.opinion[self.match], 7, 5)
 
 
 
         show, _ = imgui.collapsing_header("Optional Questions")
         if show:
             imgui.text("How passive or aggressive was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 6, "Passive", "Aggressive")
+            self.showLikertScale(self.opinion[self.match], 7, 6, "Passive", "Aggressive")
 
             imgui.text("How well did the NPC riposte compared to you?")
-            self.showLikertScale(self.opinion[self.round], 7, 7)
+            self.showLikertScale(self.opinion[self.match], 7, 7)
             imgui.text("How delayed or reactive was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 8, "Delayed", "Reactive")
+            self.showLikertScale(self.opinion[self.match], 7, 8, "Delayed", "Reactive")
             imgui.text("How humanlike was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 9, "Human", "Inhuman")
+            self.showLikertScale(self.opinion[self.match], 7, 9, "Human", "Inhuman")
             imgui.text("How predictable was the NPC?")
-            self.showLikertScale(self.opinion[self.round], 7, 10, "Predictable", "Unpredictable")
+            self.showLikertScale(self.opinion[self.match], 7, 10, "Predictable", "Unpredictable")
             imgui.text("Was the NPC behaviour exploitable?")
-            self.showLikertScale(self.opinion[self.round], 7, 11, "Exploitable", "Adaptive")
+            self.showLikertScale(self.opinion[self.match], 7, 11, "Exploitable", "Adaptive")
         imgui.text("")
         imgui.text("")
 
         imgui.same_line(200)
         if imgui.button("Proceed"):
-            if self.validateAnswers(self.opinion[self.round]):
+            if self.validateAnswers(self.opinion[self.match]):
                 self.closeUI()
         imgui.end()
 
@@ -217,7 +223,6 @@ class GUI:
         imgui.text("This is the end of the survey")
         imgui.text("")
         if imgui.button("Exit"):
-            self.saveDataToCSV()
             sys.exit()
         imgui.end()
 
@@ -235,9 +240,8 @@ class GUI:
                         answered = True
                 if answered == False:
                     stringData += ",-1"
-        print("writing1")
+
         f.write(stringData)
-        print("writing2")
         f.close()
 
 
