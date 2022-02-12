@@ -26,6 +26,7 @@ class GUI:
         self.callback = callback
 
         self.opinion = []
+        self.roundResults = [[],[],[],[],[]]
 
         self.ethnicity = ""
         self.nationality = ""
@@ -225,11 +226,17 @@ class GUI:
             sys.exit()
         imgui.end()
 
+    def addGameDetails(self, whoWon, timeSpent, moments):
+        self.roundResults[self.match].append(whoWon)
+        self.roundResults[self.match].append(timeSpent)
+        self.roundResults[self.match].append(moments)
+
+
     def saveDataToCSV(self):
         f = open("MLSkillStepData.csv", "a")
         if self.username == "" or self.anon:
             self.username = datetime.now()
-        stringData= "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh)
+        stringData = "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh)
         for round in self.opinion:
             for question in round:
                 answered = False
@@ -241,6 +248,16 @@ class GUI:
                     stringData += ",-1"
 
         f.write(stringData)
+
+        for i in range(0, 5):
+            stringData = "\n" + str(i) + "," + str(self.roundResults[i][0]) + "," + str(self.roundResults[i][1])
+            f.write(stringData)
+            for player in range(2):
+                stringData = "\n" + str(i)
+                for j in self.roundResults[i][2][player]:
+                    stringData += "," + str(j)
+                f.write(stringData)
+
         f.close()
 
 

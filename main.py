@@ -110,17 +110,16 @@ def main():
         pygame.display.flip()
         pygame.event.pump()
 
-def matchEndedHandler(whoWon):
+def matchEndedHandler(whoWon, timeSpent, moments):
     global round
     global matchInProgress
     global match
     global matches
-
+    gui.addGameDetails(whoWon,timeSpent,moments)
     matchInProgress = False
     round += 1
     nextRound = 0
     if (round<4):
-
         notFoundNext = True
         while (notFoundNext):
             nextRound = random.randint(1,3)

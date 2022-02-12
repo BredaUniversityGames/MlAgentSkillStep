@@ -17,7 +17,7 @@ class GameMatch:
         self.callback = callback
 
         self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","streetFighter-ppo-400k","streetFighter-ppo-600k","streetFighter-ppo-700k"]
-
+        self.moments = [[],[]]
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
         self.obs = self.env.reset()
@@ -41,11 +41,8 @@ class GameMatch:
             if info['matches_won'] == 1:
                 for i in range(0,550):
                     self.env.step(act)
-                    self.actionFrame += 1
                 skipFirst = False
                 self.matchesWon = 1
-            self.actionFrame += 1
-
 
     def getPlaying(self):
         return self.matchNr == 2 and self.actionFrame >= 500
@@ -126,13 +123,19 @@ class GameMatch:
 
         # if info['matches_won'] == 1 and self.actionFrame == 500:
         #     displaying = True
+
+        #['health'] / ['enemy_health']
+        #collect data from the moments of the game
+        if self.actionFrame % 30 == 0:
+            self.moments[0].append(info['health'])
+            self.moments[1].append(info['enemy_health'])
+
         if info['matches_won'] == 2:
             self.ended = True
             self.env.close()
-            self.callback(1)
+            self.callback(0, self.actionFrame, self.moments)
         elif info['enemy_matches_won'] == self.enemyWon+1:
             self.ended = True
             self.env.close()
-            self.callback(0)
+            self.callback(1,self.actionFrame, self.moments)
         self.actionFrame += 1
-
