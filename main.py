@@ -104,7 +104,7 @@ def main():
             fooimage.draw((0, 0))
         imgui.new_frame()
         gui.on_frame()
-        clock.tick()
+        clock.tick(30)
         imgui.render()
         impl.render(imgui.get_draw_data())
         pygame.display.flip()

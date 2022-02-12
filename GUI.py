@@ -99,7 +99,6 @@ class GUI:
         if self.state == 2:
             self.saveDataToCSV()
 
-
     def closeUI(self):
         self.match = self.nextMatch
         self.callback()
