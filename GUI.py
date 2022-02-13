@@ -108,6 +108,24 @@ class GUI:
             self.nextUI()
             self.closed = False
 
+    def displayTutorial(self):
+        imgui.set_next_window_size(300, 200)
+        imgui.set_next_window_position(0, 0)
+        imgui.begin("Controls tutorial", closable=False, flags=self.window_flag)
+        imgui.text("")
+        imgui.text("Move buttons:")
+        imgui.text("←↑→↓")
+        imgui.text("")
+        imgui.text("Attack buttons:")
+        imgui.text("A S D")
+        imgui.text("Z X C")
+        imgui.text("")
+        imgui.text("")
+
+        if imgui.button("Start Survey"):
+            self.survey = True
+            self.closeUI()
+
     def displayLogin(self):
         imgui.set_next_window_size(800, 600)
         imgui.set_next_window_position(0, 0)
