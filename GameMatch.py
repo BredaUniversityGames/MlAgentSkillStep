@@ -15,7 +15,10 @@ class GameMatch:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self,diff,callback):
         self.callback = callback
-
+        self.tutorial = False
+        if diff == -1:
+            diff = 2
+            self.tutorial = True
         self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","streetFighter-ppo-400k","streetFighter-ppo-600k","streetFighter-ppo-700k"]
         self.moments = [[],[]]
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
@@ -108,9 +111,11 @@ class GameMatch:
 
         # if actionFrame == 4:
         #     actionFrame = 0
-
-        a2, _ = self.model.predict(self.obs)
-        a2 = a2.tolist()
+        if not self.tutorial:
+            a2, _ = self.model.predict(self.obs)
+            a2 = a2.tolist()
+        else:
+            a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         act = a2 + self.action_array
 
@@ -126,16 +131,41 @@ class GameMatch:
 
         #['health'] / ['enemy_health']
         #collect data from the moments of the game
-        if self.actionFrame % 30 == 0:
-            self.moments[0].append(info['health'])
-            self.moments[1].append(info['enemy_health'])
-
-        if info['matches_won'] == 2:
-            self.ended = True
-            self.env.close()
-            self.callback(0, self.actionFrame, self.moments)
-        elif info['enemy_matches_won'] == self.enemyWon+1:
-            self.ended = True
-            self.env.close()
-            self.callback(1,self.actionFrame, self.moments)
+        if not self.tutorial:
+            if self.actionFrame % 30 == 0:
+                self.moments[0].append(info['health'])
+                self.moments[1].append(info['enemy_health'])
+            if info['matches_won'] == 2:
+                self.ended = True
+                self.env.close()
+                self.callback(0, self.actionFrame, self.moments)
+            elif info['enemy_matches_won'] == self.enemyWon+1:
+                self.ended = True
+                self.env.close()
+                self.callback(1,self.actionFrame, self.moments)
+        else:
+            if info['matches_won'] == 2 or info['enemy_matches_won'] == self.enemyWon + 1:
+                self.reset()
         self.actionFrame += 1
+
+    def reset(self):
+        self.obs = self.env.reset()
+        self.enemyWon = 0
+        self.matchesWon = 0
+        self.ended = False
+        self.action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.actionFrame = 0
+        skipFirst = True
+        while skipFirst:
+            a2, _ = self.model.predict(self.obs)
+            a2 = a2.tolist()
+
+            act = a2 + self.action_array
+            self.obs, rew, done, info = self.env.step(act)
+            self.enemyWon = info['enemy_matches_won']
+            if info['matches_won'] == 1:
+                for i in range(0, 550):
+                    self.env.step(act)
+                skipFirst = False
+                self.matchesWon = 1
