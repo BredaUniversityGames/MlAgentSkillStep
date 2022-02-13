@@ -63,7 +63,12 @@ def uiNextHandler():
     if (round<5):
         matchInProgress = not matchInProgress
 
-
+def tutorialHandler():
+    global match
+    global matchInProgress
+    match.closeMatch()
+    match = GameMatch(-1,matchEndedHandler)
+    matchInProgress = True
 def main():
     global match
     global gui
@@ -134,7 +139,7 @@ def matchEndedHandler(whoWon, timeSpent, moments):
     gui.nextUI()
 if __name__ == "__main__":
     match = GameMatch(0,matchEndedHandler)
-    gui = GUI(uiNextHandler)
+    gui = GUI(uiNextHandler, tutorialHandler)
     main()
 
 

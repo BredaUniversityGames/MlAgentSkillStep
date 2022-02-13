@@ -18,12 +18,13 @@ def show_help_marker(desc):
 
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
-    def __init__(self,callback):
+    def __init__(self,callback, callbackTutorial):
         maxRounds = 5
         nrQuestionsInRound = 12
         pointsOnScale = 7
 
         self.callback = callback
+        self.callbackTutorial = callbackTutorial
 
         self.opinion = []
         self.roundResults = [[],[],[],[],[]]
@@ -109,9 +110,8 @@ class GUI:
             self.closed = False
 
     def displayTutorial(self):
-        imgui.set_next_window_size(300, 200)
         imgui.set_next_window_position(0, 0)
-        imgui.begin("Controls tutorial", closable=False, flags=self.window_flag)
+        imgui.begin("Controls tutorial", closable=False)
         imgui.text("")
         imgui.text("Move buttons:")
         imgui.text("←↑→↓")
@@ -125,6 +125,7 @@ class GUI:
         if imgui.button("Start Survey"):
             self.survey = True
             self.closeUI()
+        imgui.end()
 
     def displayLogin(self):
         imgui.set_next_window_size(800, 600)
@@ -174,7 +175,9 @@ class GUI:
         imgui.text("")
         imgui.text("")
         if imgui.button("Tutorial"):
-            self.tutorial = True
+            if self.GDPR and self.gender != "" and self.nationality != "" and self.ethnicity != "" and self.noh != "" and self.age != "":
+                self.tutorial = True
+                self.callbackTutorial()
         imgui.same_line(200)
         if imgui.button("Start Survey"):
             if self.GDPR and self.gender!="" and self.nationality!="" and self.ethnicity!="" and self.noh!="" and self.age!="":
@@ -282,6 +285,9 @@ class GUI:
     def on_frame(self):
 
         if self.closed: return
+        if self.tutorial:
+            self.displayTutorial()
+            return
         if self.state == 1:
             self.displayQuestionary()
         elif self.state == 0:

@@ -16,6 +16,7 @@ class GameMatch:
     def __init__(self,diff,callback):
         self.callback = callback
         self.tutorial = False
+        #Tutorial Mode is set as diff -1
         if diff == -1:
             diff = 2
             self.tutorial = True
