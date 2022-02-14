@@ -19,6 +19,7 @@ def show_help_marker(desc):
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self,callback, callbackTutorial):
+        self.didTutorial = False
         maxRounds = 5
         nrQuestionsInRound = 12
         pointsOnScale = 7
@@ -28,6 +29,7 @@ class GUI:
 
         self.opinion = []
         self.roundResults = [[],[],[],[],[]]
+        self.order = []
 
         self.ethnicity = ""
         self.nationality = ""
@@ -125,6 +127,7 @@ class GUI:
         if imgui.button("Start Survey"):
             self.survey = True
             self.tutorial = False
+            self.didTutorial = True
             self.closeUI()
             self.callbackTutorial()
         imgui.end()
@@ -249,7 +252,9 @@ class GUI:
             sys.exit()
         imgui.end()
 
-    def addGameDetails(self, whoWon, timeSpent, moments):
+    def addGameDetails(self, whihcMLAgent, whoWon, timeSpent, moments):
+        self.order.append(self.match+1)
+        self.roundResults[self.match].append(whihcMLAgent)
         self.roundResults[self.match].append(whoWon)
         self.roundResults[self.match].append(timeSpent)
         self.roundResults[self.match].append(moments)
@@ -259,7 +264,7 @@ class GUI:
         f = open("MLSkillStepData.csv", "a")
         if self.username == "" or self.anon:
             self.username = datetime.now()
-        stringData = "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh)
+        stringData = "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh) + "," + str(self.didTutorial)
         for round in self.opinion:
             for question in round:
                 answered = False
@@ -271,13 +276,17 @@ class GUI:
                     stringData += ",-1"
 
         f.write(stringData)
-
+        stringData = "\n"
+        for i in self.order:
+             stringData += str(i) + ","
+        f.write(stringData)
         for i in range(0, 5):
-            stringData = "\n" + str(i) + "," + str(self.roundResults[i][0]) + "," + str(self.roundResults[i][1])
+            stringData = "\n" + str(i+1) + "," + str(self.roundResults[i][0]) + "," + str(self.roundResults[i][1]) + ","
+            stringData += str(self.roundResults[i][2])
             f.write(stringData)
             for player in range(2):
-                stringData = "\n" + str(i)
-                for j in self.roundResults[i][2][player]:
+                stringData = "\n" + str(i+1)
+                for j in self.roundResults[i][3][player]:
                     stringData += "," + str(j)
                 f.write(stringData)
 

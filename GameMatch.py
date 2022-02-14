@@ -16,6 +16,7 @@ class GameMatch:
     def __init__(self,diff,callback):
         self.callback = callback
         self.tutorial = False
+        self.diff = diff
         #Tutorial Mode is set as diff -1
         if diff == -1:
             diff = 2
@@ -142,11 +143,11 @@ class GameMatch:
             if info['matches_won'] == 2:
                 self.ended = True
                 self.env.close()
-                self.callback(0, self.actionFrame, self.moments)
+                self.callback(self.difficulties[self.diff], 0, self.actionFrame, self.moments)
             elif info['enemy_matches_won'] == self.enemyWon+1:
                 self.ended = True
                 self.env.close()
-                self.callback(1,self.actionFrame, self.moments)
+                self.callback(self.difficulties[self.diff], 1, self.actionFrame, self.moments)
         else:
             if info['matches_won'] == 2 or info['enemy_matches_won'] == self.enemyWon + 1:
                 self.reset()
