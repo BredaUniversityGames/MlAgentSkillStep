@@ -43,8 +43,11 @@ class GameMatch:
             self.obs, rew, done, info = self.env.step(act)
             self.enemyWon = info['enemy_matches_won']
             if info['matches_won'] == 1:
-                for i in range(0,550):
-                    self.env.step(act)
+                skipToNext = True
+                while skipToNext:
+                    self.obs, rew, done, info = self.env.step(act)
+                    if info['health'] == 176:
+                        skipToNext = False
                 skipFirst = False
                 self.matchesWon = 1
 
@@ -166,7 +169,10 @@ class GameMatch:
             self.obs, rew, done, info = self.env.step(act)
             self.enemyWon = info['enemy_matches_won']
             if info['matches_won'] == 1:
-                for i in range(0, 550):
-                    self.env.step(act)
+                skipToNext = True
+                while skipToNext:
+                    self.obs, rew, done, info = self.env.step(act)
+                    if info['health'] == 176:
+                        skipToNext = False
                 skipFirst = False
                 self.matchesWon = 1

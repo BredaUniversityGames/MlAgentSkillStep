@@ -124,7 +124,9 @@ class GUI:
 
         if imgui.button("Start Survey"):
             self.survey = True
+            self.tutorial = False
             self.closeUI()
+            self.callbackTutorial()
         imgui.end()
 
     def displayLogin(self):

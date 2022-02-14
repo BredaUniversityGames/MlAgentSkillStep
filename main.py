@@ -22,6 +22,7 @@ enableUI = True
 round = 0
 match = None
 gui = None
+tutorial = False
 matches = [True,False,False,False,False]
 
 def initializeDisplay(w, h):
@@ -66,9 +67,19 @@ def uiNextHandler():
 def tutorialHandler():
     global match
     global matchInProgress
-    match.closeMatch()
-    match = GameMatch(-1,matchEndedHandler)
-    matchInProgress = True
+    global tutorial
+    if not tutorial:
+        tutorial = True
+        match.closeMatch()
+        match = GameMatch(-1,matchEndedHandler)
+        matchInProgress = True
+    else:
+        print("da")
+        tutorial = False
+        match.closeMatch()
+        match = GameMatch(0, matchEndedHandler)
+        matchInProgress = True
+
 def main():
     global match
     global gui
