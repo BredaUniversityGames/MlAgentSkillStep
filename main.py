@@ -26,7 +26,7 @@ tutorial = False
 matches = [True,False,False,False,False]
 
 def initializeDisplay(w, h):
-    pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT | pygame.RESIZABLE)
+    pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT)
     imgui.create_context()
 
     glClearColor(0.0, 0.0, 0.0, 1.0)
