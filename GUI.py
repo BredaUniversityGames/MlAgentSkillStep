@@ -214,7 +214,7 @@ class GUI:
         imgui.text("How well did the NPC move compared to you?")
         self.showLikertScale(self.opinion[self.match], 7, 5)
 
-        show, _ = imgui.collapsing_header("Optional Questions")
+        show, _ = imgui.collapsing_header("Additional Questions")
         show = True
         if show:
             imgui.text("How passive or aggressive was the NPC?")
