@@ -14,6 +14,7 @@ from stable_baselines3.common.env_util import make_vec_env
 class GameMatch:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self,diff,callback):
+        self.aps = 0
         self.callback = callback
         self.tutorial = False
         self.diff = diff
@@ -22,7 +23,7 @@ class GameMatch:
             diff = 2
             self.tutorial = True
         self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","100KV1","500KV1","1000KV1"]
-        self.moments = [[],[]]
+        self.moments = [[],[],[]]
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
         self.obs = self.env.reset()
@@ -111,6 +112,7 @@ class GameMatch:
             for i, a in enumerate(self.butts):
                 if a in self.actions:
                     self.action_array[i] = 1
+                    self.aps += 1
                 else:
                     self.action_array[i] = 0
 
@@ -140,6 +142,9 @@ class GameMatch:
             if self.actionFrame % 30 == 0:
                 self.moments[0].append(info['health'])
                 self.moments[1].append(info['enemy_health'])
+                self.moments[2].append(self.aps)
+                print(self.aps)
+                self.aps=0
             if info['matches_won'] == 2:
                 self.ended = True
                 self.env.close()

@@ -286,7 +286,7 @@ class GUI:
                 self.roundResults[i][1]) + ","
             stringData += str(self.roundResults[i][2])
             f.write(stringData)
-            for player in range(2):
+            for player in range(3):
                 stringData = "\n" + str(i + 1)
                 for j in self.roundResults[i][3][player]:
                     stringData += "," + str(j)
