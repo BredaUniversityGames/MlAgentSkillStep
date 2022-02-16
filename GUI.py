@@ -7,6 +7,7 @@ from imgui.integrations.pygame import PygameRenderer
 import imgui
 from datetime import datetime
 
+
 def show_help_marker(desc):
     imgui.text_disabled("(?)")
     if imgui.is_item_hovered():
@@ -16,9 +17,10 @@ def show_help_marker(desc):
         imgui.pop_text_wrap_pos()
         imgui.end_tooltip()
 
+
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
-    def __init__(self,callback, callbackTutorial):
+    def __init__(self, callback, callbackTutorial):
         self.didTutorial = False
         maxRounds = 5
         nrQuestionsInRound = 12
@@ -28,7 +30,7 @@ class GUI:
         self.callbackTutorial = callbackTutorial
 
         self.opinion = []
-        self.roundResults = [[],[],[],[],[]]
+        self.roundResults = [[], [], [], [], []]
         self.order = []
 
         self.ethnicity = ""
@@ -55,12 +57,12 @@ class GUI:
         self.window_flags |= imgui.WINDOW_NO_COLLAPSE
 
         self.id = 211
-        self.initAnswerMatrix(maxRounds,nrQuestionsInRound,pointsOnScale)
+        self.initAnswerMatrix(maxRounds, nrQuestionsInRound, pointsOnScale)
 
     def setMatchRoundId(self, matchRoundId):
         self.nextMatch = matchRoundId
 
-    def initAnswerMatrix(self,rounds,nrQuestions,nrPointsOnScale):
+    def initAnswerMatrix(self, rounds, nrQuestions, nrPointsOnScale):
         for i in range(rounds):
             self.opinion.append([])
             for j in range(nrQuestions):
@@ -68,25 +70,22 @@ class GUI:
                 for k in range(nrPointsOnScale):
                     self.opinion[i][j].append(False)
 
-    def checkRadioButton(self,questionAnswer, questionNR, size, itemPoz):
+    def checkRadioButton(self, questionAnswer, questionNR, size, itemPoz):
         onlyAnswer = True
         for i in range(size):
-            if questionAnswer[questionNR][i] == True and i!=itemPoz:
-                onlyAnswer = False
-                return onlyAnswer
-        return onlyAnswer
+            if questionAnswer[questionNR][i] == True and i != itemPoz:
+                questionAnswer[questionNR][i] = False
 
     def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excelent"):
 
         imgui.text(quant1)
         for i in range(size):
-            imgui.same_line(90+i*25)
-            #Use push id to avoid unique labels
-            imgui.push_id(str(questionNR)+str(i))
+            imgui.same_line(90 + i * 25)
+            # Use push id to avoid unique labels
+            imgui.push_id(str(questionNR) + str(i))
             clicked, questionAnswer[questionNR][i] = imgui.checkbox("", questionAnswer[questionNR][i])
             if clicked:
-                if not self.checkRadioButton(questionAnswer, questionNR, size, i):
-                    questionAnswer[questionNR][i] = False
+                self.checkRadioButton(questionAnswer, questionNR, size, i)
             imgui.pop_id()
         imgui.same_line()
         imgui.text(quant2)
@@ -116,7 +115,7 @@ class GUI:
         imgui.begin("Controls tutorial", closable=False)
         imgui.text("")
         imgui.text("Move buttons:")
-        imgui.text("←↑→↓")
+        imgui.text("Arrow keys <-v^-> ")
         imgui.text("")
         imgui.text("Attack buttons:")
         imgui.text("A S D")
@@ -185,13 +184,13 @@ class GUI:
                 self.callbackTutorial()
         imgui.same_line(200)
         if imgui.button("Start Survey"):
-            if self.GDPR and self.gender!="" and self.nationality!="" and self.ethnicity!="" and self.noh!="" and self.age!="":
+            if self.GDPR and self.gender != "" and self.nationality != "" and self.ethnicity != "" and self.noh != "" and self.age != "":
                 self.survey = True
                 self.closeUI()
         imgui.end()
 
     def displayQuestionary(self):
-        #Create this rounds answers dimension
+        # Create this rounds answers dimension
 
         imgui.set_next_window_size(800, 600)
         imgui.set_next_window_position(0, 0)
@@ -215,9 +214,8 @@ class GUI:
         imgui.text("How well did the NPC move compared to you?")
         self.showLikertScale(self.opinion[self.match], 7, 5)
 
-
-
         show, _ = imgui.collapsing_header("Optional Questions")
+        show = True
         if show:
             imgui.text("How passive or aggressive was the NPC?")
             self.showLikertScale(self.opinion[self.match], 7, 6, "Passive", "Aggressive")
@@ -232,6 +230,9 @@ class GUI:
             self.showLikertScale(self.opinion[self.match], 7, 10, "Predictable", "Unpredictable")
             imgui.text("Was the NPC behaviour exploitable?")
             self.showLikertScale(self.opinion[self.match], 7, 11, "Exploitable", "Adaptive")
+            if self.round > 0:
+                imgui.text("How skilled was this NPC compared to the previous one?")
+
         imgui.text("")
         imgui.text("")
 
@@ -253,24 +254,24 @@ class GUI:
         imgui.end()
 
     def addGameDetails(self, whihcMLAgent, whoWon, timeSpent, moments):
-        self.order.append(self.match+1)
+        self.order.append(self.match + 1)
         self.roundResults[self.match].append(whihcMLAgent)
         self.roundResults[self.match].append(whoWon)
         self.roundResults[self.match].append(timeSpent)
         self.roundResults[self.match].append(moments)
 
-
     def saveDataToCSV(self):
         f = open("MLSkillStepData.csv", "a")
         if self.username == "" or self.anon:
             self.username = datetime.now()
-        stringData = "\n"+str(self.username) + "," +str(self.age) + "," +str(self.gender) + "," +str(self.nationality) + "," +str(self.ethnicity) + "," +str(self.noh) + "," + str(self.didTutorial)
+        stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.didTutorial)
         for round in self.opinion:
             for question in round:
                 answered = False
-                for i in range(0,7):
+                for i in range(0, 7):
                     if question[i] == True:
-                        stringData+=","+ str(i)
+                        stringData += "," + str(i)
                         answered = True
                 if answered == False:
                     stringData += ",-1"
@@ -278,20 +279,20 @@ class GUI:
         f.write(stringData)
         stringData = "\n"
         for i in self.order:
-             stringData += str(i) + ","
+            stringData += str(i) + ","
         f.write(stringData)
         for i in range(0, 5):
-            stringData = "\n" + str(i+1) + "," + str(self.roundResults[i][0]) + "," + str(self.roundResults[i][1]) + ","
+            stringData = "\n" + str(i + 1) + "," + str(self.roundResults[i][0]) + "," + str(
+                self.roundResults[i][1]) + ","
             stringData += str(self.roundResults[i][2])
             f.write(stringData)
             for player in range(2):
-                stringData = "\n" + str(i+1)
+                stringData = "\n" + str(i + 1)
                 for j in self.roundResults[i][3][player]:
                     stringData += "," + str(j)
                 f.write(stringData)
 
         f.close()
-
 
     def on_frame(self):
 
@@ -308,7 +309,7 @@ class GUI:
 
     def validateAnswers(self, questions):
         allMandatoryQuestionsAnswered = True
-        for i in range(6):
+        for i in range(12):
             answeredQuestion = False
             for j in range(7):
                 if questions[i][j]:

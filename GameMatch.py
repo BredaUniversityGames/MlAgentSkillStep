@@ -21,7 +21,7 @@ class GameMatch:
         if diff == -1:
             diff = 2
             self.tutorial = True
-        self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","streetFighter-ppo-400k","streetFighter-ppo-600k","streetFighter-ppo-700k"]
+        self.difficulties = ["streetFighter-ppo-1k","streetFighter-ppo-10k","100KV1","500KV1","1000KV1"]
         self.moments = [[],[]]
         self.env_id = "StreetFighterIISpecialChampionEdition-Genesis"
         self.env = retro.make(self.env_id, state='2p', players=2)
