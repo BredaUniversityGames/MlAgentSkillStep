@@ -178,6 +178,9 @@ class GUI:
         clicked, self.anon = imgui.checkbox(label="Remain anonymous", state=self.anon)
         clicked, self.skipTutorial = imgui.checkbox(label="Skip Tutorial", state=self.skipTutorial)
         imgui.text("")
+        imgui.text("This research aims to analyse the skill of Machine Learning Artificial Intelligence.")
+        imgui.text("You will fight 5 enemy NPC's in random order that each learned to play for longer or shorter periods of time.")
+        imgui.text("")
         imgui.text("")
         imgui.same_line(200)
         if imgui.button("Start Survey"):
@@ -236,7 +239,7 @@ class GUI:
                 self.showLikertScale(self.opinion[self.match], 3, 12, "Less Skilled", "More Skilled")
         imgui.text("")
 
-        imgui.same_line(200)
+        imgui.same_line(300)
         if imgui.button("Proceed"):
             if self.validateAnswers(self.opinion[self.match]):
                 self.closeUI()
