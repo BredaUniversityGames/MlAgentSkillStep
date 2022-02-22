@@ -33,15 +33,17 @@ class GameMatch:
         self.butts = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
         self.action_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.action_nukeCleaner = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+        self.action_nukeCleanerMove = [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
         self.enemyWon = 0
         self.matchesWon = 0
         self.ended = False
         skipFirst = True
+        change = 0
         while skipFirst:
-            a2, _ = self.model.predict(self.obs)
-            a2 = a2.tolist()
-
-            act = a2 + self.action_array
+            if change%10 < 7:
+                act = self.action_nukeCleanerMove + self.action_array
+            else:act = self.action_nukeCleaner + self.action_array
             self.obs, rew, done, info = self.env.step(act)
             self.enemyWon = info['enemy_matches_won']
             if info['matches_won'] == 1:
@@ -52,6 +54,7 @@ class GameMatch:
                         skipToNext = False
                 skipFirst = False
                 self.matchesWon = 1
+            change+=1
 
     def getPlaying(self):
         return self.matchNr == 2 and self.actionFrame >= 500
@@ -115,7 +118,6 @@ class GameMatch:
                     self.aps += 1
                 else:
                     self.action_array[i] = 0
-
         # if actionFrame == 4:
         #     actionFrame = 0
         if not self.tutorial:
@@ -167,11 +169,12 @@ class GameMatch:
         self.a2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.actionFrame = 0
         skipFirst = True
+        change=0
         while skipFirst:
-            a2, _ = self.model.predict(self.obs)
-            a2 = a2.tolist()
-
-            act = a2 + self.action_array
+            if change % 10 < 7:
+                act = self.action_nukeCleanerMove + self.action_array
+            else:
+                act = self.action_nukeCleaner + self.action_array
             self.obs, rew, done, info = self.env.step(act)
             self.enemyWon = info['enemy_matches_won']
             if info['matches_won'] == 1:
@@ -182,3 +185,4 @@ class GameMatch:
                         skipToNext = False
                 skipFirst = False
                 self.matchesWon = 1
+            change+=1
