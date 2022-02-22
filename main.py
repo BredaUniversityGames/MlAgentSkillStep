@@ -74,7 +74,6 @@ def tutorialHandler():
         match = GameMatch(-1,matchEndedHandler)
         matchInProgress = True
     else:
-        print("da")
         tutorial = False
         match.closeMatch()
         match = GameMatch(0, matchEndedHandler)

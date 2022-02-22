@@ -145,7 +145,6 @@ class GameMatch:
                 self.moments[0].append(info['health'])
                 self.moments[1].append(info['enemy_health'])
                 self.moments[2].append(self.aps)
-                print(self.aps)
                 self.aps=0
             if info['matches_won'] == 2:
                 self.ended = True

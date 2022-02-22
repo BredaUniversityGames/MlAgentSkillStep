@@ -21,6 +21,7 @@ def show_help_marker(desc):
 class GUI:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self, callback, callbackTutorial):
+        self.skipTutorial = False
         self.didTutorial = False
         maxRounds = 5
         nrQuestionsInRound = 12
@@ -175,18 +176,18 @@ class GUI:
             label="Agree with the data processing mentioned at: https://bit.ly/MGTO2022", state=self.GDPR)
 
         clicked, self.anon = imgui.checkbox(label="Remain anonymous", state=self.anon)
-
+        clicked, self.skipTutorial = imgui.checkbox(label="Skip Tutorial", state=self.skipTutorial)
         imgui.text("")
         imgui.text("")
-        if imgui.button("Tutorial"):
-            if self.GDPR and self.gender != "" and self.nationality != "" and self.ethnicity != "" and self.noh != "" and self.age != "":
-                self.tutorial = True
-                self.callbackTutorial()
         imgui.same_line(200)
         if imgui.button("Start Survey"):
             if self.GDPR and self.gender != "" and self.nationality != "" and self.ethnicity != "" and self.noh != "" and self.age != "":
-                self.survey = True
-                self.closeUI()
+                if self.skipTutorial:
+                    self.survey = True
+                    self.closeUI()
+                else:
+                    self.tutorial = True
+                    self.callbackTutorial()
         imgui.end()
 
     def displayQuestionary(self):
