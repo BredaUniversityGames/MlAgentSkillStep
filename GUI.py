@@ -24,7 +24,7 @@ class GUI:
         self.skipTutorial = False
         self.didTutorial = False
         maxRounds = 5
-        nrQuestionsInRound = 12
+        nrQuestionsInRound = 13
         pointsOnScale = 7
 
         self.callback = callback
@@ -233,8 +233,7 @@ class GUI:
             self.showLikertScale(self.opinion[self.match], 7, 11, "Exploitable", "Adaptive")
             if self.round > 0:
                 imgui.text("How skilled was this NPC compared to the previous one?")
-
-        imgui.text("")
+                self.showLikertScale(self.opinion[self.match], 3, 12, "Less Skilled", "More Skilled")
         imgui.text("")
 
         imgui.same_line(200)
