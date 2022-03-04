@@ -1,2 +1,6 @@
 *.zip
 .idea/
+build/
+dist/
+main.exe
+main.spec

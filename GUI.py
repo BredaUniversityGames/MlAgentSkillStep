@@ -7,6 +7,8 @@ from imgui.integrations.pygame import PygameRenderer
 import imgui
 from datetime import datetime
 
+from DataSender import sendEmail
+
 
 def show_help_marker(desc):
     imgui.text_disabled("(?)")
@@ -101,6 +103,7 @@ class GUI:
         else:
             self.state += 1
         if self.state == 2:
+            self.sendDataToEmail()
             self.saveDataToCSV()
 
     def closeUI(self):
@@ -262,6 +265,34 @@ class GUI:
         self.roundResults[self.match].append(whoWon)
         self.roundResults[self.match].append(timeSpent)
         self.roundResults[self.match].append(moments)
+
+    def sendDataToEmail(self):
+        if self.username == "" or self.anon:
+            self.username = datetime.now()
+        stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.didTutorial)
+        for round in self.opinion:
+            for question in round:
+                answered = False
+                for i in range(0, 7):
+                    if question[i] == True:
+                        stringData += "," + str(i)
+                        answered = True
+                if answered == False:
+                    stringData += ",-1"
+        stringData += "\n"
+        for i in self.order:
+            stringData += str(i) + ","
+        for i in range(0, 5):
+            stringData += "\n" + str(i + 1) + "," + str(self.roundResults[i][0]) + "," + str(
+                self.roundResults[i][1]) + ","
+            stringData += str(self.roundResults[i][2])
+            for player in range(3):
+                stringData += "\n" + str(i + 1)
+                for j in self.roundResults[i][3][player]:
+                    stringData += "," + str(j)
+
+        sendEmail(stringData)
 
     def saveDataToCSV(self):
         f = open("MLSkillStepData.csv", "a")
