@@ -149,7 +149,6 @@ def matchEndedHandler(whichMLAgent, whoWon, timeSpent, moments):
         match = GameMatch(round,matchEndedHandler)
     gui.nextUI()
 if __name__ == "__main__":
-    sendEmail("hello Test")
     match = GameMatch(0,matchEndedHandler)
     gui = GUI(uiNextHandler, tutorialHandler)
     main()

@@ -36,11 +36,12 @@ class GUI:
         self.roundResults = [[], [], [], [], []]
         self.order = []
 
-        self.ethnicity = ""
+        self.ethnicity = 0
         self.nationality = ""
         self.survey = False
         self.tutorial = False
         self.anon = False
+        self.exp = False
         self.GDPR = False
         self.noh = ""
         self.gender = ""
@@ -163,11 +164,16 @@ class GUI:
             buffer_length=64,
         )
         imgui.text("Ethnicity")
-        clicked, self.ethnicity = imgui.input_text(
+        changed, self.ethnicity = imgui.combo(
             label="Ethnicity",
-            value=self.ethnicity,
-            buffer_length=64,
+            current=self.ethnicity,
+            items=["Aboriginal", "African American or Black", "Asian", "European American or White", "Native American", "Native Hawaiian or Pacific Islander", "Maori"]
         )
+        # clicked, self.ethnicity = imgui.input_text(
+        #     label="Ethnicity",
+        #     value=self.ethnicity,
+        #     buffer_length=64,
+        # )
         imgui.text("Number of Hours playing video games per week")
         clicked, self.noh = imgui.input_text(
             label="Hours played",
@@ -179,6 +185,7 @@ class GUI:
             label="Agree with the data processing mentioned at: https://bit.ly/MGTO2022", state=self.GDPR)
 
         clicked, self.anon = imgui.checkbox(label="Remain anonymous", state=self.anon)
+        clicked, self.exp = imgui.checkbox(label="Do you have previous experience playing 2 player fighting games such as Street Fighter II?", state=self.exp)
         clicked, self.skipTutorial = imgui.checkbox(label="Skip Tutorial", state=self.skipTutorial)
         imgui.text("")
         imgui.text("This research aims to analyse the skill of Machine Learning Artificial Intelligence.")
