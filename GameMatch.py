@@ -15,6 +15,7 @@ class GameMatch:
     # diff - a number from 0 to 4 representing the level of difficulty
     def __init__(self,diff,callback):
         self.aps = 0
+        self.fps = 0
         self.callback = callback
         self.tutorial = False
         self.diff = diff

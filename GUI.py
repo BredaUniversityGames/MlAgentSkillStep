@@ -29,6 +29,7 @@ class GUI:
         nrQuestionsInRound = 13
         pointsOnScale = 7
 
+        self.fps=0
         self.callback = callback
         self.callbackTutorial = callbackTutorial
 
@@ -266,7 +267,9 @@ class GUI:
             sys.exit()
         imgui.end()
 
-    def addGameDetails(self, whihcMLAgent, whoWon, timeSpent, moments):
+    def addGameDetails(self, whihcMLAgent, whoWon, fpsavg, timeSpent, moments):
+        self.fps += fpsavg
+        print(fpsavg)
         self.order.append(self.match + 1)
         self.roundResults[self.match].append(whihcMLAgent)
         self.roundResults[self.match].append(whoWon)
@@ -277,7 +280,7 @@ class GUI:
         if self.username == "" or self.anon:
             self.username = datetime.now()
         stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
-            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.didTutorial)
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
         for round in self.opinion:
             for question in round:
                 answered = False
@@ -306,7 +309,7 @@ class GUI:
         if self.username == "" or self.anon:
             self.username = datetime.now()
         stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
-            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.didTutorial)
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
         for round in self.opinion:
             for question in round:
                 answered = False

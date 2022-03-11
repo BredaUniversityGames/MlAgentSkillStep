@@ -25,6 +25,7 @@ match = None
 gui = None
 tutorial = False
 matches = [True,False,False,False,False]
+clockFps = None
 
 def initializeDisplay(w, h):
     pygame.display.set_mode((w,h), pygame.DOUBLEBUF | pygame.OPENGL | pygame.OPENGLBLIT)
@@ -83,6 +84,7 @@ def tutorialHandler():
 def main():
     global match
     global gui
+    global clockFps
 
     render_init(800, 600)
     io = imgui.get_io()
@@ -91,6 +93,7 @@ def main():
     impl = PygameRenderer()
     count = 0
     clock = pygame.time.Clock()
+    clockFps = clock
     glLoadIdentity()
     while running:
         count+=1
@@ -131,7 +134,8 @@ def matchEndedHandler(whichMLAgent, whoWon, timeSpent, moments):
     global matchInProgress
     global match
     global matches
-    gui.addGameDetails(whichMLAgent, whoWon, timeSpent,moments)
+    global clockFps
+    gui.addGameDetails(whichMLAgent, whoWon, clockFps.get_fps(), timeSpent,moments)
     matchInProgress = False
     round += 1
     nextRound = 0
