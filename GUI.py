@@ -27,7 +27,7 @@ class GUI:
         self.didTutorial = False
         self.buttonClicked = False
         maxRounds = 5
-        nrQuestionsInRound = 14
+        self.nrQuestionsInRound = 14
         pointsOnScale = 7
 
         self.fps=0
@@ -64,7 +64,7 @@ class GUI:
         self.window_flags |= imgui.WINDOW_NO_COLLAPSE
 
         self.id = 211
-        self.initAnswerMatrix(maxRounds, nrQuestionsInRound, pointsOnScale)
+        self.initAnswerMatrix(maxRounds, self.nrQuestionsInRound, pointsOnScale)
 
     def setMatchRoundId(self, matchRoundId):
         self.nextMatch = matchRoundId
@@ -270,11 +270,10 @@ class GUI:
         if self.round > 0:
             imgui.text("How skilled was this NPC compared to the previous one?")
             self.showLikertScale(self.opinion[self.match], 3, 13, "Less Skilled", "More Skilled")
-        imgui.text("")
 
-        imgui.same_line(300)
+        imgui.same_line(400)
         if imgui.button("Proceed"):
-            if self.validateAnswers(self.opinion[self.match]):
+            if self.validateAnswers(self.opinion[self.match],self.round):
                 self.closeUI()
             else:
                 self.buttonClicked = True
@@ -377,9 +376,12 @@ class GUI:
         else:
             self.displayThanks()
 
-    def validateAnswers(self, questions):
+    def validateAnswers(self, questions,firstRound):
         allMandatoryQuestionsAnswered = True
-        for i in range(12):
+        nrQuestionsChecked = self.nrQuestionsInRound
+        if firstRound == 0:
+            nrQuestionsChecked -= 1
+        for i in range(nrQuestionsChecked):
             answeredQuestion = False
             for j in range(7):
                 if questions[i][j]:
