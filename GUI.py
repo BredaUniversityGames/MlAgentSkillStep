@@ -26,7 +26,7 @@ class GUI:
         self.skipTutorial = False
         self.didTutorial = False
         maxRounds = 5
-        nrQuestionsInRound = 13
+        nrQuestionsInRound = 14
         pointsOnScale = 7
 
         self.fps=0
@@ -220,34 +220,33 @@ class GUI:
         imgui.text("How skilled were you?")
         self.showLikertScale(self.opinion[self.match], 7, 2)
 
-        imgui.text("How well did the NPC attack compared to you?")
-        self.showLikertScale(self.opinion[self.match], 7, 3)
+        imgui.text("How skilled was the NPC compared to you?")
+        self.showLikertScale(self.opinion[self.match], 5, 3, "Less Skilled", "More Skilled")
 
-        imgui.text("How well did the NPC defend compared to you?")
+        imgui.text("How well did the NPC attack compared to you?")
         self.showLikertScale(self.opinion[self.match], 7, 4)
 
-        imgui.text("How well did the NPC move compared to you?")
+        imgui.text("How well did the NPC defend compared to you?")
         self.showLikertScale(self.opinion[self.match], 7, 5)
 
-        show, _ = imgui.collapsing_header("Additional Questions")
-        show = True
-        if show:
-            imgui.text("How passive or aggressive was the NPC?")
-            self.showLikertScale(self.opinion[self.match], 7, 6, "Passive", "Aggressive")
+        imgui.text("How well did the NPC move compared to you?")
+        self.showLikertScale(self.opinion[self.match], 7, 6)
 
-            imgui.text("How well did the NPC riposte compared to you?")
-            self.showLikertScale(self.opinion[self.match], 7, 7)
-            imgui.text("How delayed or reactive was the NPC?")
-            self.showLikertScale(self.opinion[self.match], 7, 8, "Delayed", "Reactive")
-            imgui.text("How humanlike was the NPC?")
-            self.showLikertScale(self.opinion[self.match], 7, 9, "Human", "Inhuman")
-            imgui.text("How predictable was the NPC?")
-            self.showLikertScale(self.opinion[self.match], 7, 10, "Predictable", "Unpredictable")
-            imgui.text("Was the NPC behaviour exploitable?")
-            self.showLikertScale(self.opinion[self.match], 7, 11, "Exploitable", "Adaptive")
-            if self.round > 0:
-                imgui.text("How skilled was this NPC compared to the previous one?")
-                self.showLikertScale(self.opinion[self.match], 3, 12, "Less Skilled", "More Skilled")
+        imgui.text("How passive or aggressive was the NPC?")
+        self.showLikertScale(self.opinion[self.match], 7, 7, "Passive", "Aggressive")
+        imgui.text("How well did the NPC riposte compared to you?")
+        self.showLikertScale(self.opinion[self.match], 7, 8)
+        imgui.text("How delayed were the NPC's reactions?")
+        self.showLikertScale(self.opinion[self.match], 7, 9, "Delayed", "Reactive")
+        imgui.text("How human-like was the NPC?")
+        self.showLikertScale(self.opinion[self.match], 7, 10, "Human", "Inhuman")
+        imgui.text("How predictable was the NPC?")
+        self.showLikertScale(self.opinion[self.match], 7, 11, "Predictable", "Unpredictable")
+        imgui.text("Was the NPC behaviour exploitable?")
+        self.showLikertScale(self.opinion[self.match], 7, 12, "Exploitable", "Adaptive")
+        if self.round > 0:
+            imgui.text("How skilled was this NPC compared to the previous one?")
+            self.showLikertScale(self.opinion[self.match], 3, 13, "Less Skilled", "More Skilled")
         imgui.text("")
 
         imgui.same_line(300)
@@ -269,7 +268,6 @@ class GUI:
 
     def addGameDetails(self, whihcMLAgent, whoWon, fpsavg, timeSpent, moments):
         self.fps += fpsavg
-        print(fpsavg)
         self.order.append(self.match + 1)
         self.roundResults[self.match].append(whihcMLAgent)
         self.roundResults[self.match].append(whoWon)
