@@ -38,6 +38,7 @@ class GUI:
         self.order = []
 
         self.ethnicity = 0
+        self.education = 0
         self.nationality = ""
         self.survey = False
         self.tutorial = False
@@ -168,7 +169,13 @@ class GUI:
         changed, self.ethnicity = imgui.combo(
             label="Ethnicity",
             current=self.ethnicity,
-            items=["Aboriginal", "African American or Black", "Asian", "European American or White", "Native American", "Native Hawaiian or Pacific Islander", "Maori"]
+            items=["Asian/Pacific Islander", "African American or Black", "Hispanic", "European American or White", "Multiracial/Multiethnic"]
+        )
+        imgui.text("Highest level of education completed")
+        changed, self.education = imgui.combo(
+            label="Highest level of education completed",
+            current=self.education,
+            items=["elementary","high school", "bachelor's degree","master's degree", "doctorate"]
         )
         # clicked, self.ethnicity = imgui.input_text(
         #     label="Ethnicity",
@@ -278,7 +285,7 @@ class GUI:
         if self.username == "" or self.anon:
             self.username = datetime.now()
         stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
-            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.education) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
         for round in self.opinion:
             for question in round:
                 answered = False
@@ -307,7 +314,7 @@ class GUI:
         if self.username == "" or self.anon:
             self.username = datetime.now()
         stringData = "\n" + str(self.username) + "," + str(self.age) + "," + str(self.gender) + "," + str(
-            self.nationality) + "," + str(self.ethnicity) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
+            self.nationality) + "," + str(self.ethnicity) + "," + str(self.education) + "," + str(self.noh) + "," + str(self.exp) + "," + str(self.didTutorial) + "," + str(self.fps/5)
         for round in self.opinion:
             for question in round:
                 answered = False
