@@ -139,18 +139,15 @@ def matchEndedHandler(whichMLAgent, whoWon, timeSpent, moments):
     matchInProgress = False
     round += 1
     nextRound = 0
-    if (round<4):
+    if (round<5):
         notFoundNext = True
         while (notFoundNext):
-            nextRound = random.randint(1,3)
+            nextRound = random.randint(1,4)
             if (matches[nextRound] == False):
                 notFoundNext = False
                 matches[nextRound] = True
         gui.setMatchRoundId(nextRound)
         match = GameMatch(nextRound, matchEndedHandler)
-    elif (round<5):
-        gui.setMatchRoundId(round)
-        match = GameMatch(round,matchEndedHandler)
     gui.nextUI()
 if __name__ == "__main__":
     match = GameMatch(0,matchEndedHandler)

@@ -221,7 +221,7 @@ class GUI:
         self.showLikertScale(self.opinion[self.match], 7, 2)
 
         imgui.text("How skilled was the NPC compared to you?")
-        self.showLikertScale(self.opinion[self.match], 5, 3, "Less Skilled", "More Skilled")
+        self.showLikertScale(self.opinion[self.match], 3, 3, "Less Skilled", "More Skilled")
 
         imgui.text("How well did the NPC attack compared to you?")
         self.showLikertScale(self.opinion[self.match], 7, 4)
