@@ -4,6 +4,11 @@ import sys
 from DataSender import sendEmail
 from GUI import GUI
 import pygame
+import gym
+import retro
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.env_util import make_vec_env
 import os
 
 from OpenGL.GL import *
@@ -156,23 +161,24 @@ if __name__ == "__main__":
 
 
 
-# env_id= "StreetFighterIISpecialChampionEdition-Genesis"
-# env = retro.make(env_id, state='2p', players=2)
-# obs = env.reset()
-# # env = SubprocVecEnv([retro.make(env_id, state='Champion.Level1.RyuVsGuile') for i in range(n_cpus)])
-#
-# # model = PPO("MlpPolicy", env, verbose=1)
-# # # # model = PPO.load("streetFighter-ppo-100k")
-# # for i in range(100):
-# #  model.learn(total_timesteps=500000)
-# #  model.save("streetFighter-ppo-500k")
-# model = PPO.load("streetFighter-ppo-500k")
-#
-# # for i in range(100000):
-# #     action, _states = model.predict(obs, deterministic=True)
-# #     obs, reward, done, info = env.step(action)
-# #     env.render()
-# #     if done:
-# #       obs = env.reset()
-# #
-# # env.close()
+    # env_id= "StreetFighterIISpecialChampionEdition-Genesis"
+    # # env = retro.make(env_id, state='2p', players=2)
+    # env = retro.make(env_id, state='Champion.Level1.RyuVsGuile')
+    # obs = env.reset()
+    # # env = SubprocVecEnv([retro.make(env_id, state='Champion.Level1.RyuVsGuile') for i in range(n_cpus)])
+    #
+    # model = PPO("MlpPolicy", env)
+    # # # model = PPO.load("streetFighter-ppo-100k")
+    #
+    # model.learn(total_timesteps=10)
+    # model.save("streetFighter-ppo-10")
+    # #model = PPO.load("streetFighter-ppo-500k")
+    # #
+    # # # for i in range(100000):
+    # # #     action, _states = model.predict(obs, deterministic=True)
+    # # #     obs, reward, done, info = env.step(action)
+    # # #     env.render()
+    # # #     if done:
+    # # #       obs = env.reset()
+    # # #
+    # env.close()
