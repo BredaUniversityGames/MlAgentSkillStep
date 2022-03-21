@@ -81,7 +81,7 @@ class GUI:
             if questionAnswer[questionNR][i] == True and i != itemPoz:
                 questionAnswer[questionNR][i] = False
 
-    def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excelent"):
+    def showLikertScale(self, questionAnswer, size, questionNR, quant1="Poor", quant2="Excellent"):
 
         imgui.text(quant1)
         for i in range(size):
