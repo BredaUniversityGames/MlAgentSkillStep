@@ -118,6 +118,7 @@ class GUI:
             self.closed = False
 
     def displayTutorial(self):
+        imgui.set_next_window_size(300, 300)
         imgui.set_next_window_position(0, 0)
         imgui.begin("Controls tutorial", closable=False)
         imgui.text("")
@@ -128,14 +129,19 @@ class GUI:
         imgui.text("A S D")
         imgui.text("Z X C")
         imgui.text("")
+        imgui.text("Defend: Move Back")
         imgui.text("")
-
+        imgui.text("Throw: Move into enemy NPC and press S")
+        imgui.text("")
+        imgui.text("")
         if imgui.button("Start Survey"):
             self.survey = True
             self.tutorial = False
             self.didTutorial = True
             self.closeUI()
             self.callbackTutorial()
+        imgui.text("")
+        imgui.text("")
         imgui.end()
 
     def displayLogin(self):
