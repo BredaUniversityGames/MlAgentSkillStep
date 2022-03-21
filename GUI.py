@@ -25,6 +25,7 @@ class GUI:
     def __init__(self, callback, callbackTutorial):
         self.skipTutorial = False
         self.didTutorial = False
+        self.buttonClicked = False
         maxRounds = 5
         nrQuestionsInRound = 14
         pointsOnScale = 7
@@ -113,6 +114,7 @@ class GUI:
         self.match = self.nextMatch
         self.callback()
         self.closed = True
+        self.buttonClicked = False
         if self.round == 4:
             self.nextUI()
             self.closed = False
@@ -145,6 +147,7 @@ class GUI:
         imgui.end()
 
     def displayLogin(self):
+
         imgui.set_next_window_size(800, 600)
         imgui.set_next_window_position(0, 0)
         imgui.begin("User Information", closable=False, flags=self.window_flags)
@@ -216,6 +219,12 @@ class GUI:
                 else:
                     self.tutorial = True
                     self.callbackTutorial()
+                    self.buttonClicked = False
+            else:
+                self.buttonClicked = True
+        if self.buttonClicked:
+            imgui.same_line()
+            imgui.text_colored("Fill in everything!", 1.0, 0.0, 0.0, 1.0)
         imgui.end()
 
     def displayQuestionary(self):
@@ -267,6 +276,11 @@ class GUI:
         if imgui.button("Proceed"):
             if self.validateAnswers(self.opinion[self.match]):
                 self.closeUI()
+            else:
+                self.buttonClicked = True
+        if self.buttonClicked:
+            imgui.same_line()
+            imgui.text_colored("Fill in everything!",1.0,0.0,0.0,1.0)
         imgui.end()
 
     def displayThanks(self):
