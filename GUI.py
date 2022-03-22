@@ -11,6 +11,7 @@ from DataSender import sendEmail
 
 
 def show_help_marker(desc):
+    imgui.same_line()
     imgui.text_disabled("(?)")
     if imgui.is_item_hovered():
         imgui.begin_tooltip()
@@ -87,7 +88,7 @@ class GUI:
 
         imgui.text(quant1)
         for i in range(size):
-            imgui.same_line(90 + i * 25)
+            imgui.same_line(120 + i * 25)
             # Use push id to avoid unique labels
             imgui.push_id(str(questionNR) + str(i))
             clicked, questionAnswer[questionNR][i] = imgui.checkbox("", questionAnswer[questionNR][i])
@@ -235,7 +236,7 @@ class GUI:
         imgui.begin("Questionnaire " + str(self.round + 1) + "/5", closable=False, flags=self.window_flags)
 
         imgui.text("Did you enjoy competing against this NPC?")
-        self.showLikertScale(self.opinion[self.match], 7, 0, "Hated it", "Enjoyed it")
+        self.showLikertScale(self.opinion[self.match], 7, 0, "Didn't enjoy it", "Enjoyed it")
 
         imgui.text("How skilled was the NPC?")
         self.showLikertScale(self.opinion[self.match], 7, 1)
@@ -258,13 +259,14 @@ class GUI:
         imgui.text("How passive or aggressive was the NPC?")
         self.showLikertScale(self.opinion[self.match], 7, 7, "Passive", "Aggressive")
         imgui.text("How well did the NPC riposte compared to you?")
+        show_help_marker("A riposte is when you offer an immediate attack after a parry or block")
         self.showLikertScale(self.opinion[self.match], 7, 8)
         imgui.text("How delayed were the NPC's reactions?")
         self.showLikertScale(self.opinion[self.match], 7, 9, "Delayed", "Reactive")
         imgui.text("How human-like was the NPC?")
-        self.showLikertScale(self.opinion[self.match], 7, 10, "Human", "Inhuman")
+        self.showLikertScale(self.opinion[self.match], 7, 10, "Inhuman", "Human")
         imgui.text("How predictable was the NPC?")
-        self.showLikertScale(self.opinion[self.match], 7, 11, "Predictable", "Unpredictable")
+        self.showLikertScale(self.opinion[self.match], 7, 11, "Unpredictable", "Predictable")
         imgui.text("Was the NPC behaviour exploitable?")
         self.showLikertScale(self.opinion[self.match], 7, 12, "Exploitable", "Adaptive")
         if self.round > 0:
