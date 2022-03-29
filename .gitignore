@@ -1,4 +1,6 @@
 *.zip
+*.csv
+*.txt
 .idea/
 build/
 dist/
