@@ -120,6 +120,18 @@ def plotFight(entryNr,fightNr):
     plt.plot(frames, fight[1], 'b-', label='NPC')
     plt.plot(frames, fight[2], 'g-', label='Player')
     plt.plot(frames, fight[3], 'r-', label='Aps Of Player')
+
+    z1 = np.array(fight[1])
+    z2 = np.array(fight[2])
+    plt.fill_between(frames,fight[1], fight[2],
+                     where=(z1 >= z2),
+                     color='b',alpha=0.5, interpolate=True)
+    plt.fill_between(frames, fight[1], fight[2],
+                     where=(z1 <= z2),
+                     color='g', alpha=0.5, interpolate=True)
+    # plt.fill_between(frames, fight[1], fight[2],
+    #                  where=(fight[1] < fight[2]),
+    #                  color='g')
     plt.xlabel('Time (seconds)')
     plt.ylabel('Health')
     plt.show()
