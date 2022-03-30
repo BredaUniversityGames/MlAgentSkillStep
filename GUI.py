@@ -281,7 +281,10 @@ class GUI:
             self.showLikertScale(self.opinion[self.match], 3, 13, "Less Skilled", "More Skilled")
 
         imgui.same_line(400)
-        if imgui.button("Proceed"):
+        stringButtonNext = "Finish"
+        if self.round < 4:
+            stringButtonNext ="Next NPC " + str(self.round + 2) + "/5"
+        if imgui.button(stringButtonNext):
             if self.validateAnswers(self.opinion[self.match],self.round):
                 self.closeUI()
             else:
