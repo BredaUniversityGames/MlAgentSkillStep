@@ -108,8 +108,15 @@ class GUI:
         else:
             self.state += 1
         if self.state == 2:
-            self.sendDataToEmail()
-            self.saveDataToCSV()
+            try:
+                self.saveDataToCSV()
+            except:
+                print("Can't write results on csv, please contact me at 214930@buas.nl")
+            try:
+                self.sendDataToEmail()
+            except:
+                print("Can't send results email, please contact me at 214930@buas.nl")
+
 
     def closeUI(self):
         self.match = self.nextMatch

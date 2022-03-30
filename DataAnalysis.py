@@ -17,7 +17,7 @@ obj = []
 entry = []
 fights = [[],[],[],[],[]]
 
-def masterDataAnalyser(dataSet):
+def NPCDataAnalyser(dataSet):
     NPCList = {}
     for entry in dataSet:
         for fights in entry[4]:
@@ -34,6 +34,9 @@ def masterDataAnalyser(dataSet):
             npc = entry[3][roundFight]-1
             fightDetails = entry[4][npc]
             npcName = fightDetails[0][0]
+            NPCList[npcName][5][roundFight][0].append(fightDetails[1])
+            NPCList[npcName][5][roundFight][1].append(fightDetails[2])
+            NPCList[npcName][5][roundFight][2].append(fightDetails[3])
             #print(fightDetails[0])
             if (fightDetails[0][1]==0): #if human lost
                 NPCList[npcName][0][roundFight][0] += 1 #first position is for npc
@@ -41,7 +44,7 @@ def masterDataAnalyser(dataSet):
                 NPCList[npcName][2][roundFight][0] += fightDetails[0][2]
                 NPCList[npcName][3][roundFight][0].append(fightDetails[1][len(fightDetails[1])-1])
                 NPCList[npcName][4][roundFight][0] += fightDetails[1][len(fightDetails[1]) - 1]
-                NPCList[npcName][5][roundFight][0].append(fightDetails[1][len(fightDetails[1]) - 1])
+
             else:
                 NPCList[npcName][0][roundFight][1] += 1
                 NPCList[npcName][1][roundFight][1].append(fightDetails[0][2])
@@ -77,15 +80,26 @@ def plotAvgTimeOfAllNPCs(NPCList):
 
 
 def plotHPofNPCOverTime(NPCList, npc):
-    pass
+    for roundFight in range(0,5):
+        for fight in NPCList[npc][5][roundFight][1]:
+            plt.plot(range(0,len(fight)),fight)
+        plt.title("HP of " + npc + " in round " + str(roundFight))
+        plt.show()
 
+def plotHPofPlayerOverTime(NPCList, npc):
+    for roundFight in range(0,5):
+        for fight in NPCList[npc][5][roundFight][2]:
+            plt.plot(range(0,len(fight)),fight)
+        plt.title("HP of " + npc + " in round " + str(roundFight))
+        plt.show()
 
 def printNPCList(NPCList):
     plotAvgTimeOfAllNPCs(NPCList)
-
     for npc in NPCList:
         plotWonLostOverRounds(NPCList,npc)
         plotHPofNPCOverTime(NPCList,npc)
+        plotHPofPlayerOverTime(NPCList,npc)
+        #plotResponsesOfNPC()
 
 def plotWonLostOverRounds(NPCList, npc):
     aggregWon = []
@@ -107,12 +121,35 @@ def plotWonLostOverRounds(NPCList, npc):
         concatWon = concatWon + round
     plotBoxAvg([concatWon,concatLost], npc + " Average time per all matches won/lost")
 
+def plotGraphAnswersFight(answers, npc):
+    # fig, ax = plt.subplots()
+    #
+    # ax.hist(answers, bins=14, linewidth=1, edgecolor="white")
+    # # ax.set(xlim=(0, 14), xticks=np.arange(1, 14),
+    # #        ylim=(0, 7), yticks=np.linspace(0, 7, 14))
+    # plt.title(str(npc) + "responses")
+    # plt.show()
+    values = copy.deepcopy(answers)
+    del values[13]
+    del values[3]
+    labels = ["Enjoyment","NPC skill","Player Skill","attack","defend","move","aggresive","riposte","reactive","human","predictable","adaptive"]
+    indexes = np.arange(len(labels))
+    width = 1
+
+    plt.bar(indexes, values, width, align='center',edgecolor = "black")
+
+    plt.xticks(indexes, labels)  # Replace default x-ticks with xs, then replace xs with labels
+    plt.yticks(values)
+    plt.show()
 
 def masterDataAnalyserEntry(entryNo):
     plotAnswers(entryNo)
+    for roundFight in range(0,5):
+        plotGraphAnswersFight(entries[entryNo][1][roundFight],entries[entryNo][4][entries[entryNo][3][roundFight]-1][0][0])
     plotFights(entryNo)
 
 def plotFight(entryNr,fightNr):
+
     fight = entries[entryNr][4][fightNr]
     frames = []
     for i in range(1, len(fight[1]) + 1):
@@ -129,11 +166,10 @@ def plotFight(entryNr,fightNr):
     plt.fill_between(frames, fight[1], fight[2],
                      where=(z1 <= z2),
                      color='g', alpha=0.5, interpolate=True)
-    # plt.fill_between(frames, fight[1], fight[2],
-    #                  where=(fight[1] < fight[2]),
-    #                  color='g')
     plt.xlabel('Time (seconds)')
     plt.ylabel('Health')
+    plt.title('Round against ' + entries[entryNr][4][fightNr][0][0])
+    plt.legend()
     plt.show()
 
 def plotFights(entryNr):
@@ -149,7 +185,7 @@ def plotAnswers(entryNo,numberOfEntries=1,question=None):
         for fight in answer[1]:
             print(fight)
 
-def plotParticipantsData(entryNo,numberOfEntries=1):
+def printParticipantsData(entryNo,numberOfEntries=1):
     answers = entries[entryNo:entryNo+numberOfEntries]
     index = entryNo
     for answer in answers:
@@ -165,7 +201,7 @@ def plotParticipantsData(entryNo,numberOfEntries=1):
                         print(detail)
             else:
                 print(answer[dataRow])
-    plotFights(entryNo)
+    #plotFights(entryNo)
 def getAvgAnswers():
     answers = copy.deepcopy(entries[0][1])
     for i in range(0, 5):
@@ -241,8 +277,8 @@ for line in Lines:
         # fights[fightNo] = [ [about] [hpNPC] [hpPlayer] [apmPlayer] ]
 #
 
-plotParticipantsData(34,1)
+printParticipantsData(39,1)
 #print(getVarianceAnsers())
 
-# masterDataAnalyserEntry(0)
-masterDataAnalyser(entries)
+masterDataAnalyserEntry(39)
+#NPCDataAnalyser(entries)
