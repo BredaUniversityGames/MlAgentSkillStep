@@ -155,30 +155,35 @@ def matchEndedHandler(whichMLAgent, whoWon, timeSpent, moments):
         match = GameMatch(nextRound, matchEndedHandler)
     gui.nextUI()
 if __name__ == "__main__":
-    match = GameMatch(0,matchEndedHandler)
-    gui = GUI(uiNextHandler, tutorialHandler)
-    main()
+    # print("")
+    # print("Please play with an internet connection!")
+    # print("")
+    # match = GameMatch(0,matchEndedHandler)
+    # gui = GUI(uiNextHandler, tutorialHandler)
+    # main()
 
 
 
-    # env_id= "StreetFighterIISpecialChampionEdition-Genesis"
-    # # env = retro.make(env_id, state='2p', players=2)
-    # env = retro.make(env_id, state='Champion.Level1.RyuVsGuile')
-    # obs = env.reset()
-    # # env = SubprocVecEnv([retro.make(env_id, state='Champion.Level1.RyuVsGuile') for i in range(n_cpus)])
-    #
+    env_id= "StreetFighterIISpecialChampionEdition-Genesis"
+    # env = retro.make(env_id, state='2p', players=2)
+    env = retro.make(env_id, state='Champion.Level1.RyuVsGuile')
+    obs = env.reset()
+    # env = SubprocVecEnv([retro.make(env_id, state='Champion.Level1.RyuVsGuile') for i in range(n_cpus)])
+
+
+    model = PPO.load("streetFighter-ppo-100")
+    print(model.policy)
+
     # model = PPO("MlpPolicy", env)
-    # # # model = PPO.load("streetFighter-ppo-100k")
+    # model.learn(total_timesteps=1)
+    # model.save("streetFighter-ppo-1")
+    #model = PPO.load("streetFighter-ppo-500k")
     #
-    # model.learn(total_timesteps=10)
-    # model.save("streetFighter-ppo-10")
-    # #model = PPO.load("streetFighter-ppo-500k")
+    # # for i in range(100000):
+    # #     action, _states = model.predict(obs, deterministic=True)
+    # #     obs, reward, done, info = env.step(action)
+    # #     env.render()
+    # #     if done:
+    # #       obs = env.reset()
     # #
-    # # # for i in range(100000):
-    # # #     action, _states = model.predict(obs, deterministic=True)
-    # # #     obs, reward, done, info = env.step(action)
-    # # #     env.render()
-    # # #     if done:
-    # # #       obs = env.reset()
-    # # #
-    # env.close()
+    env.close()

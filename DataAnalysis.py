@@ -17,6 +17,49 @@ obj = []
 entry = []
 fights = [[],[],[],[],[]]
 
+
+populationGenderProc = 0
+populationAgeAvg = 0
+populationNationProc = 0
+populationEducProc = {}
+populationExp = 0
+def nohFilter(entry):
+    return entry<15
+
+def populationDemographics(dataSet):
+    global populationGenderProc
+    global populationAgeAvg
+    global populationNationProc
+    global populationEducProc
+    global populationExp
+    aggregGender = []
+    aggregAge = []
+    aggregNation = []
+    aggregEduc = []
+    aggregNoh = []
+    aggregExp = []
+    for entry in dataSet:
+        aggregGender.append(entry[0][2][0].lower())
+        aggregAge.append(int(entry[0][1]))
+        aggregNation.append(entry[0][3][0].lower())
+        aggregEduc.append(int(entry[0][5]))
+        aggregNoh.append(int(entry[0][6]))
+        aggregExp.append(entry[0][7][0])
+    populationAgeAvg = getAvgNumber(aggregAge)
+    populationGenderProc = getPercentageForCriteria(aggregGender,"m")
+    populationNationProc = getPercentageForCriteria(aggregNation,"r")
+    populationEducProc["school"] = getPercentageForCriteria(aggregEduc, 0)
+    populationEducProc["highschool"] = getPercentageForCriteria(aggregEduc,1)
+    populationEducProc["bachelor"] = getPercentageForCriteria(aggregEduc, 2)
+    populationEducProc["master"] = getPercentageForCriteria(aggregEduc, 3)
+    populationExp = getPercentageForCriteria(aggregExp,"T")
+    print(getPercentageForFilter(aggregNoh,nohFilter))
+    print(populationAgeAvg)
+    print(populationGenderProc)
+    print(populationNationProc)
+    print(populationEducProc)
+    print(populationExp)
+
 def NPCDataAnalyser(dataSet):
     NPCList = {}
     for entry in dataSet:
@@ -67,6 +110,28 @@ def plotBoxAvg(data, nameOfData):
     ax1.boxplot(data)
     plt.show()
 
+def getAvgNumber(data):
+    howMany = len(data)
+    sumAgg = 0
+    for e in data:
+        sumAgg += e
+    return sumAgg/howMany
+
+def getPercentageForCriteria(data, criteria):
+    howManyTotal = len(data)
+    howManyCrit = 0
+    for e in data:
+        if e == criteria:
+            howManyCrit+=1
+    return howManyCrit * 100 / howManyTotal
+
+def getPercentageForFilter(data, criteria):
+    howManyTotal = len(data)
+    howManyCrit = 0
+    for e in data:
+        if criteria(e):
+            howManyCrit+=1
+    return howManyCrit * 100 / howManyTotal
 
 def plotAvgTimeOfAllNPCs(NPCList):
     aggregTime= []
@@ -277,8 +342,9 @@ for line in Lines:
         # fights[fightNo] = [ [about] [hpNPC] [hpPlayer] [apmPlayer] ]
 #
 
-printParticipantsData(39,1)
+printParticipantsData(42,1)
 #print(getVarianceAnsers())
+populationDemographics(entries)
 
-masterDataAnalyserEntry(39)
+# masterDataAnalyserEntry(42)
 #NPCDataAnalyser(entries)
