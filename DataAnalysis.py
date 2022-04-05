@@ -2,6 +2,11 @@ import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from DataBase import DataBase
+from NPC import filterNPC
+from Participant import Participant
+
 file1 = open('AnalyseData.csv', 'r')
 Lines = file1.readlines()
 NPCDataExplained = ["Matches won/lost","All times per match","Avg time per match",
@@ -25,237 +30,9 @@ populationNationProc = 0
 populationEducProc = {}
 populationExp = 0
 
-class Quiz:
-    def __init__(self,dataEntry):
-        self.enjoy = dataEntry[0]
-        self.skillNPC = dataEntry[1]
-        self.skillPlayer = dataEntry[2]
-        self.skillRelative = dataEntry[3]
-        self.skillAttack = dataEntry[4]
-        self.skillMove = dataEntry[5]
-        self.skillDefend = dataEntry[6]
-        self.passiveAggressive = dataEntry[7]
-        self.riposte = dataEntry[8]
-        self.delayed = dataEntry[9]
-        self.human = dataEntry[10]
-        self.predictable = dataEntry[11]
-        self.exploitable = dataEntry[12]
-        self.skillNPCtoPrevNPC = dataEntry[13]
-        self.critDictionary = {"enjoy": self.enjoy, "skillNPC": self.skillNPC, "skillPlayer": self.skillPlayer,
-                               "skillRelative": self.skillRelative, "skillAttack": self.skillAttack, "skillMove": self.skillMove, "skillDefend": self.skillDefend,
-                               "passiveAggressive": self.passiveAggressive, "self.riposte": self.riposte, "delayed":self.delayed, "human":self.human, "predictable":self.predictable, "exploitable":self.exploitable, "skillNPCtoPrevNPC":self.skillNPCtoPrevNPC}
-
-
-class FightMatch:
-    def __init__(self,dataEntry):
-        self.NPC = dataEntry[0][0]
-        self.whoWon = dataEntry[0][1]
-        self.durationFrames = dataEntry[0][2]
-        self.durationSec = dataEntry[0][2]/30
-        self.hpNPC = dataEntry[1]
-        self.hpPlayer = dataEntry[2]
-        self.apsPlayer = dataEntry[3]
-
-class PresenceNPC:
-    def __init__(self, dataPack, participant):
-        self.matchOrderNr = dataPack[0]
-        self.fightOrderNr = dataPack[1]
-        self.participant = participant
-        self.quiz = dataPack[2]
-        self.fight = dataPack[3]
-class NPC:
-    def __init__(self,name,participants):
-        self.name = name
-        self.presences = []
-
-        for participant in participants:
-            result = participant.getNPCDetails(name)
-            if result != False:
-                self.presences.append(PresenceNPC(result,participant))
 
 
 
-    def getWins(self):
-        totalWins = 0
-        for presence in self.presences:
-            totalWins += 1 if presence.fight.whoWon == 0 else 0
-        return totalWins
-    def getLoses(self):
-        totalLoses = 0
-        for presence in self.presences:
-            totalLoses += 1 if presence.fight.whoWon == 1 else 0
-        return totalLoses
-
-
-class Participant:
-    def __init__(self,entry):
-        self.name = entry[0][0]
-        self.age = entry[0][1]
-        self.gender = entry[0][2][0].lower()
-        self.nation = entry[0][3][0:1].lower()
-        self.ethnic = entry[0][4]
-        self.education = entry[0][5]
-        self.noh = entry[0][6]
-        self.experience = entry[0][7].lower()
-        self.tutorial = entry[0][8].lower()
-        self.fps = float(entry[0][9])
-        self.answers = []
-        self.fights = []
-        self.critDictionary = {"age": self.age, "gen": self.gender, "nat": self.nation,
-                               "etn": self.ethnic, "edu": self.education, "noh": self.noh, "exp": self.experience, "tut": self.tutorial, "fps":self.fps}
-        for i in range(0,5):
-            self.answers.append(Quiz(entry[1][i]))
-            self.fights.append(FightMatch(entry[4][i]))
-        self.matchOrder = entry[3]
-        self.comparisonNPC = entry[2]
-
-    def getCriteria(self,fromCrit):
-        if fromCrit in self.critDictionary.keys():
-            return self.critDictionary[fromCrit]
-        elif fromCrit in self.answers[0].critDictionary.keys():
-            return [quiz.critDictionary[fromCrit] for quiz in self.answers]
-
-    def toString(self):
-        print("name " + str(self.name))
-        print("age " + str(self.age))
-        print("gender " + str(self.gender))
-        print("nation " + str(self.nation))
-        print("ethnic " + str(self.ethnic))
-        print("education " + str(self.education))
-        print("noh " + str(self.noh))
-        print("experience " + str(self.experience))
-        print("tutorial " + str(self.tutorial))
-        print(self.matchOrder)
-        print(self.comparisonNPC)
-        print(self.answers)
-        print(self.fights)
-
-    def locateNPC(self,nameNPC):
-        fightOrderNr = -1
-        matchOrderNr = -1
-        for fight in range(0, 5):
-            if self.fights[fight].NPC == nameNPC:
-                fightOrderNr = fight
-                break
-        for match in range(0, 5):
-            if self.matchOrder[match]-1 == fightOrderNr:
-                matchOrderNr = match
-                break
-
-        return matchOrderNr, fightOrderNr
-
-    def getNPCDetails(self,nameNPC):
-        dataPackNPC = []
-        matchOrderNr, fightOrderNr = self.locateNPC(nameNPC)
-        if matchOrderNr == -1: return False
-
-        dataPackNPC.append(matchOrderNr)
-        dataPackNPC.append(fightOrderNr)
-
-        dataPackNPC.append(self.answers[matchOrderNr])
-        dataPackNPC.append(self.fights[fightOrderNr])
-
-        return dataPackNPC
-
-
-
-class DataBase:
-    def __init__(self,participants):
-        self.participants = participants
-        self.NPCs = []
-        self.getNPCs()
-
-    def getSize(self):
-        return len(self.participants)
-
-    def operatorFunction(self,param, operator, amount):
-        if operator is None:
-            return True
-        if operator == "<":
-            return param < amount
-        if operator == "<=":
-            return param <= amount
-        if operator == ">=":
-            return param >= amount
-        if operator == ">":
-            return param > amount
-        if operator == "==":
-            return param == amount
-        raise "no such operator defined"
-
-    def filterEntriesBy(self, fromCrit, operator=None, amount=None):
-        newList = []
-        for participant in self.participants:
-            if self.operatorFunction(participant.getCriteria(fromCrit), operator, amount):
-                newList.append(participant)
-        return newList
-
-    def filterSubsetBy(self,subset, fromCrit, operator=None, amount=None):
-        newList = []
-        if operator is None:
-            for participant in subset:
-                newList += participant.getCriteria(fromCrit)
-        else:
-            for participant in subset:
-                if self.operatorFunction(participant.getCriteria(fromCrit), operator, amount):
-                    newList.append(participant)
-        return newList
-
-    def nohIncresesReportedSkillOfPlayer(self,noh):
-        entriesWithNohlessthan = self.filterEntriesBy( "noh", "<", noh)
-        entriesWithNohMoreOrEqual = self.filterEntriesBy( "noh", ">=", noh)
-        skillPlayersLess = self.filterSubsetBy(entriesWithNohlessthan,"skillPlayer")
-        skillPlayersMoreEq = self.filterSubsetBy(entriesWithNohMoreOrEqual, "skillPlayer")
-        print("avg Skill for Noh Less to " + str(noh) + " : " + str(getAvgNumber(skillPlayersLess)))
-        print("avg Skill for Noh More or Eq to " + str(noh) + " : " + str(getAvgNumber(skillPlayersMoreEq)))
-
-    def genderIncresesReportedSkillOfPlayer(self):
-        entriesM = self.filterEntriesBy( "gen", "==", "m")
-        entriesF = self.filterEntriesBy( "gen", "==", "f")
-        skillPlayersM = self.filterSubsetBy(entriesM,"skillPlayer")
-        skillPlayersF = self.filterSubsetBy(entriesF, "skillPlayer")
-        print("avg Skill for gender Male"  + " : " + str(getAvgNumber(skillPlayersM)))
-        print("avg Skill for gender Female "  + " : " + str(getAvgNumber(skillPlayersF)))
-
-    def linkTwoDataPoints(self, criteria1,criteria2, nameNPC=None, plotOpt=None):
-        dataPool = self.participants
-        if nameNPC is not None:
-            for npc in self.NPCs:
-                if npc.name == nameNPC:
-                    dataPool = npc.presences
-        criteria1Pool = []
-        criteria2Linked = []
-        for dataBite in dataPool:
-            if dataBite.getCriteria(criteria1) not in criteria1Pool:
-                criteria1Pool.append(dataBite.getCriteria(criteria1))
-                criteria2Linked.append(dataBite.getCriteria(criteria2))
-            else:
-                criteria2Linked[criteria1Pool.index(dataBite.getCriteria(criteria1))] += dataBite.getCriteria(criteria2)
-        for criteria2Index in range(0,len(criteria2Linked)):
-            criteria2Linked[criteria2Index] = getAvgNumber(criteria2Linked[criteria2Index])
-
-        if plotOpt == "dot":
-            dotPlot(criteria1Pool,criteria2Linked,criteria1,criteria2)
-        return criteria1Pool,criteria2Linked
-
-    def ageIncresesReportedSkillOfPlayer(self):
-        agePool = []
-        ageSkill = []
-        for participant in self.participants:
-            if participant.age not in agePool:
-                agePool.append(participant.age)
-                ageSkill.append(participant.getCriteria("skillPlayer"))
-            else:
-                ageSkill[agePool.index(participant.age)] += participant.getCriteria("skillPlayer")
-        for age in range(0,len(ageSkill)):
-            ageSkill[age] = getAvgNumber(ageSkill[age])
-        dotPlot(agePool,ageSkill,"age","skillPlayer")
-
-    def getNPCs(self):
-        npcNames = ["10","100","1k","100k","1000k"]
-        for name in npcNames:
-            self.NPCs.append(NPC(name,self.participants))
-        print(len(self.NPCs[0].presences))
 
 def nohFilter(entry):
     return entry<15
@@ -596,14 +373,32 @@ for line in Lines:
 
 dataBase = DataBase(objectEntries)
 
-#printParticipantsData(42,1)
+printParticipantsData(43,1)
 #print(getVarianceAnsers())
-#populationDemographics(entries)
-dataBase.nohIncresesReportedSkillOfPlayer(15)
-dataBase.genderIncresesReportedSkillOfPlayer()
+# populationDemographics(entries)
+# dataBase.nohIncresesReportedSkillOfPlayer(15)
+# dataBase.genderIncresesReportedSkillOfPlayer()
 #dataBase.ageIncresesReportedSkillOfPlayer()
-dataBase.linkTwoDataPoints("age","skillPlayer",plotOpt="dot")
-dataBase.linkTwoDataPoints("noh","skillPlayer",plotOpt="dot")
-print(dataBase.linkTwoDataPoints("gen","skillPlayer"))
-# masterDataAnalyserEntry(42)
-#NPCDataAnalyser(entries)
+#dataBase.linkTwoDataPoints("age","skillPlayer",plotOpt="dot")
+#dataBase.linkOnePointWithArrayAvg("noh","skillPlayer",plotOpt="dot")
+# print(getAvgNumber(dataBase.getNPCRemainingHP("10")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("100")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("1k")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("100K")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("1000K")))
+#
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("10")))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("100")))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("1k")))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("100K")))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("1000K")))
+
+#print(dataBase.linkCriteriasFromAllFights("skillPlayer","measuredSkill"))
+print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesWonByNPC)))
+print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC)))
+print(dataBase.linkCriteriasFromAllFights("enjoy","measuredSkill"))
+print(dataBase.linkCriteriasFromAllFights("enjoy","skillPlayer"))
+
+# print(dataBase.linkTwoDataPoints("gen","skillPlayer"))
+# masterDataAnalyserEntry(43)
+# NPCDataAnalyser(entries)
