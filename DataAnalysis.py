@@ -373,7 +373,7 @@ for line in Lines:
 
 dataBase = DataBase(objectEntries)
 
-printParticipantsData(43,1)
+# printParticipantsData(43,1)
 #print(getVarianceAnsers())
 # populationDemographics(entries)
 # dataBase.nohIncresesReportedSkillOfPlayer(15)
@@ -398,12 +398,15 @@ printParticipantsData(43,1)
 # print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC)))
 # print(dataBase.linkCriteriasFromAllFights("enjoy","measuredSkill"))
 # print(dataBase.linkCriteriasFromAllFights("enjoy","skillPlayer"))
-print(dataBase.linkOnePointWithArrayAvg("name","human",nameNPC=True,excludeMinus=True))
-print(dataBase.linkOnePointWithArrayAvg("name","predictable",nameNPC=True,excludeMinus=True))
-print(dataBase.linkOnePointWithArrayAvg("name","delayed",nameNPC=True,excludeMinus=True))
-print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
-print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
-
+# print(dataBase.linkOnePointWithArrayAvg("name","human",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","predictable",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","delayed",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayCount("name","defenseNPC",nameNPC=True,countWhat=1))
+# print(dataBase.linkOnePointWithArrayCount("name","defensePlayer",nameNPC=True,countWhat=1))
+print(dataBase.linkOnePointWithArrayCount("name","attacksNPC",nameNPC=True,countWhat=1))
+print(dataBase.linkOnePointWithArrayCount("name","attacksPlayers",nameNPC=True,countWhat=1))
 
 
 

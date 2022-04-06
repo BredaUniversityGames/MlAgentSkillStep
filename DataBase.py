@@ -4,10 +4,16 @@ from NPC import NPC
 
 
 def getAvgNumber(data):
-    howMany = len(data)
+    howMany = 0
     sumAgg = 0
     for e in data:
-        sumAgg += e
+        if isinstance(e,list):
+            for ee in e:
+                sumAgg += ee
+                howMany += 1
+        else:
+            sumAgg += e
+            howMany += 1
     return sumAgg/howMany
 
 def dotPlot(dataX,dataY,xlabel,ylabel):
@@ -17,11 +23,22 @@ def dotPlot(dataX,dataY,xlabel,ylabel):
     plt.show()
 
 
+def getCountOf(data,what):
+    howMany = 0
+    for e in data:
+        if isinstance(e, list):
+            for ee in e:
+                if ee == what:
+                    howMany += 1
+        elif e == what:
+            howMany += 1
+    return howMany
+
 class DataBase:
     def __init__(self,participants):
         self.participants = participants
         self.NPCs = []
-        self.npcNamesDict = {"10":0, "100":1, "1k":2, "100K":3, "1000K":4}
+        self.npcNamesDict = {"10":0, "100":1, "1k":2, "100k":3, "1000k":4}
         self.getNPCs()
 
     def getSize(self):
@@ -90,6 +107,20 @@ class DataBase:
             dotPlot(criteria1Pool,criteria2Linked,criteria1,criteria2)
         return criteria1Pool,criteria2Linked
 
+    def linkOnePointWithArrayCount(self, criteria1,criteria2, nameNPC=None, plotOpt=None, excludeMinus=False, countWhat=None):
+        #links a general point to an average
+
+        criteria1Pool ,criteria2Linked = self.linkBetween(criteria1,criteria2,nameNPC)
+
+        for criteria2Index in range(0,len(criteria2Linked)):
+            if excludeMinus:
+                criteria2Linked[criteria2Index] = deleteFromList(criteria2Linked[criteria2Index],-1)
+            criteria2Linked[criteria2Index] = getCountOf(criteria2Linked[criteria2Index],countWhat)
+
+        if plotOpt == "dot":
+            dotPlot(criteria1Pool,criteria2Linked,criteria1,criteria2)
+        return criteria1Pool,criteria2Linked
+
     def linkCriteriasFromAllFights(self, criteria1,criteria2, nameNPC=None, plotOpt=None ):
         criteria1Pool, criteria2Linked = self.linkBetween(criteria1, criteria2, nameNPC, identity=False)
 
@@ -116,7 +147,6 @@ class DataBase:
     def getNPCs(self):
         for name in self.npcNamesDict.keys():
             self.NPCs.append(NPC(name,self.participants))
-        print(len(self.NPCs[0].presences))
 
     def getNPCRemainingHP(self,nameNPC):
         return self.NPCs[self.npcNamesDict[nameNPC]].getHPatTheEndOfGameNPC()

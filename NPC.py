@@ -20,6 +20,7 @@ class NPC:
             return [presence.quiz.critDictionary[fromCrit] for presence in self.presences]
         elif fromCrit in self.presences[0].fight.critDictionary.keys():
             return [presence.fight.critDictionary[fromCrit] for presence in self.presences]
+        raise Exception("unknown keyword criteria")
 
     def getWins(self):
         totalWins = 0
