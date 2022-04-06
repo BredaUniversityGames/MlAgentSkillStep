@@ -1,17 +1,25 @@
+from FightMatch import FightMatch
 from PresenceNPC import PresenceNPC
+from Quiz import Quiz
 
 
 class NPC:
     def __init__(self,name,participants):
         self.name = name
         self.presences = []
-
+        self.critDictionary = {"name":self.name}
         for participant in participants:
             result = participant.getNPCDetails(name)
             if result != False:
                 self.presences.append(PresenceNPC(result,participant))
 
-
+    def getCriteria(self, fromCrit):
+        if fromCrit in self.critDictionary.keys():
+            return self.critDictionary[fromCrit]
+        elif fromCrit in self.presences[0].quiz.critDictionary.keys():
+            return [presence.quiz.critDictionary[fromCrit] for presence in self.presences]
+        elif fromCrit in self.presences[0].fight.critDictionary.keys():
+            return [presence.fight.critDictionary[fromCrit] for presence in self.presences]
 
     def getWins(self):
         totalWins = 0

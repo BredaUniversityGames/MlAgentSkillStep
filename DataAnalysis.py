@@ -394,10 +394,18 @@ printParticipantsData(43,1)
 # print(getAvgNumber(dataBase.getDiffHPatTheEnd("1000K")))
 
 #print(dataBase.linkCriteriasFromAllFights("skillPlayer","measuredSkill"))
-print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesWonByNPC)))
-print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC)))
-print(dataBase.linkCriteriasFromAllFights("enjoy","measuredSkill"))
-print(dataBase.linkCriteriasFromAllFights("enjoy","skillPlayer"))
+# print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesWonByNPC)))
+# print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC)))
+# print(dataBase.linkCriteriasFromAllFights("enjoy","measuredSkill"))
+# print(dataBase.linkCriteriasFromAllFights("enjoy","skillPlayer"))
+print(dataBase.linkOnePointWithArrayAvg("name","human",nameNPC=True,excludeMinus=True))
+print(dataBase.linkOnePointWithArrayAvg("name","predictable",nameNPC=True,excludeMinus=True))
+print(dataBase.linkOnePointWithArrayAvg("name","delayed",nameNPC=True,excludeMinus=True))
+print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
+print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
+
+
+
 
 # print(dataBase.linkTwoDataPoints("gen","skillPlayer"))
 # masterDataAnalyserEntry(43)

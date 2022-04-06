@@ -1,4 +1,5 @@
 class Quiz:
+
     def __init__(self,dataEntry):
         self.enjoy = dataEntry[0]
         self.skillNPC = dataEntry[1]

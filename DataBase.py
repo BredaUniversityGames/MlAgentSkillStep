@@ -76,12 +76,14 @@ class DataBase:
         print("avg Skill for gender Male"  + " : " + str(getAvgNumber(skillPlayersM)))
         print("avg Skill for gender Female "  + " : " + str(getAvgNumber(skillPlayersF)))
 
-    def linkOnePointWithArrayAvg(self, criteria1,criteria2, nameNPC=None, plotOpt=None):
+    def linkOnePointWithArrayAvg(self, criteria1,criteria2, nameNPC=None, plotOpt=None, excludeMinus=False):
         #links a general point to an average
 
         criteria1Pool ,criteria2Linked = self.linkBetween(criteria1,criteria2,nameNPC)
 
         for criteria2Index in range(0,len(criteria2Linked)):
+            if excludeMinus:
+                criteria2Linked[criteria2Index] = deleteFromList(criteria2Linked[criteria2Index],-1)
             criteria2Linked[criteria2Index] = getAvgNumber(criteria2Linked[criteria2Index])
 
         if plotOpt == "dot":
@@ -125,9 +127,12 @@ class DataBase:
     def linkBetween(self,criteria1,criteria2,nameNPC=None, identity=True):
         dataPool = self.participants
         if nameNPC is not None:
-            for npc in self.NPCs:
-                if npc.name == nameNPC:
-                    dataPool = npc.presences
+            if nameNPC != True:
+                for npc in self.NPCs:
+                    if npc.name == nameNPC:
+                        dataPool = [npc]
+            else:
+                dataPool = self.NPCs
         criteria1Pool = []
         criteria2Linked = []
         for dataBite in dataPool:
@@ -135,10 +140,20 @@ class DataBase:
                 criteria1Pool.append(dataBite.getCriteria(criteria1))
                 criteria2Linked.append(dataBite.getCriteria(criteria2))
             else:
-                criteria2Linked[criteria1Pool.index(dataBite.getCriteria(criteria1))] += dataBite.getCriteria(criteria2)
+                if isinstance(dataBite.getCriteria(criteria2),list):
+                    criteria2Linked[criteria1Pool.index(dataBite.getCriteria(criteria1))] += dataBite.getCriteria(criteria2)
+                else:
+                    criteria2Linked[criteria1Pool.index(dataBite.getCriteria(criteria1))].append(dataBite.getCriteria(criteria2))
         return criteria1Pool,criteria2Linked
 
     def getNPCTime(self,nameNPC,filter):
         return self.NPCs[self.npcNamesDict[nameNPC]].getNPCTime(filter)
 
 
+
+def deleteFromList(listOld, item):
+    newList = []
+    for i in listOld:
+        if i != item:
+            newList.append(i)
+    return newList
