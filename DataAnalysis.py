@@ -1,11 +1,14 @@
 import copy
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 from DataBase import DataBase
 from NPC import filterNPC
 from Participant import Participant
+
+savePlots = True
 
 file1 = open('AnalyseData.csv', 'r')
 Lines = file1.readlines()
@@ -136,6 +139,43 @@ def plotBoxAvg(data, nameOfData):
     ax1.boxplot(data)
     plt.show()
 
+def plotBar():
+    N = 5
+    menMeans = (20, 35, 30, 35, 27)
+    womenMeans = (25, 32, 34, 20, 25)
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.35
+    fig = plt.figure()
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.bar(ind, menMeans, width, color='r')
+    ax.bar(ind, womenMeans, width, bottom=menMeans, color='b')
+    ax.set_ylabel('Scores')
+    ax.set_title('Scores by group and gender')
+    ax.set_xticks(ind, ('G1', 'G2', 'G3', 'G4', 'G5'))
+    ax.set_yticks(np.arange(0, 8, 10))
+    ax.legend(labels=['Men', 'Women'])
+    plt.xticks()
+    plt.yticks()
+    plt.show()
+
+def plotBarMultipleColors(data, nameOfData, labels, yTicks=None, xTicksLabels=None):
+    mpl.style.use('default')
+    X = np.arange(len(data[0]))
+    fig = plt.figure()
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+
+    ax.bar(X - 0.25, data[0], color='b', width=0.25)
+    ax.bar(X + 0.00, data[1], color='g', width=0.25)
+    if (len(data)>2):
+        ax.bar(X + 0.25, data[2], color='r', width=0.25)
+    if (len(data) > 3): raise Exception("data size too big")
+    ax.set_title(nameOfData)
+    ax.set_xticks(X,xTicksLabels)
+    ax.set_yticks(np.arange(0, 7.5, 0.5))
+    ax.legend(labels=labels)
+    # fig.suptitle("hello")
+    plt.show()
+
 def getAvgNumber(data):
     howMany = len(data)
     sumAgg = 0
@@ -172,14 +212,14 @@ def plotAvgTimeOfAllNPCs(NPCList):
 
 def plotHPofNPCOverTime(NPCList, npc):
     for roundFight in range(0,5):
-        for fight in NPCList[npc][5][roundFight][1]:
+        for fight in NPCList[npc][5][roundFight][0]:
             plt.plot(range(0,len(fight)),fight)
         plt.title("HP of " + npc + " in round " + str(roundFight))
         plt.show()
 
 def plotHPofPlayerOverTime(NPCList, npc):
     for roundFight in range(0,5):
-        for fight in NPCList[npc][5][roundFight][2]:
+        for fight in NPCList[npc][5][roundFight][1]:
             plt.plot(range(0,len(fight)),fight)
         plt.title("HP of " + npc + " in round " + str(roundFight))
         plt.show()
@@ -239,12 +279,25 @@ def masterDataAnalyserEntry(entryNo):
         plotGraphAnswersFight(entries[entryNo][1][roundFight],entries[entryNo][4][entries[entryNo][3][roundFight]-1][0][0])
     plotFights(entryNo)
 
+def showOrSavePlot(namePlt=None):
+    global savePlots
+    if savePlots:
+        namePlt = namePlt.split(":")
+        nameNPC = namePlt[1]
+        namePlt = namePlt[0]
+        plt.savefig("Plots/NPC-"+nameNPC+"/"+namePlt+nameNPC+".png")
+        plt.close()
+    else:
+        plt.show()
+
 def plotFight(entryNr,fightNr):
 
     fight = entries[entryNr][4][fightNr]
     frames = []
     for i in range(1, len(fight[1]) + 1):
         frames.append(i)
+    if len(fight[3]) < len(frames):
+        fight[3].append(0)
     plt.plot(frames, fight[1], 'b-', label='NPC')
     plt.plot(frames, fight[2], 'g-', label='Player')
     plt.plot(frames, fight[3], 'r-', label='Aps Of Player')
@@ -261,7 +314,7 @@ def plotFight(entryNr,fightNr):
     plt.ylabel('Health')
     plt.title('Round against ' + entries[entryNr][4][fightNr][0][0])
     plt.legend()
-    plt.show()
+    showOrSavePlot("Participant " + str(entryNr) + ' Round against :' + entries[entryNr][4][fightNr][0][0])
 
 def plotFights(entryNr):
     for i in range(0,5):
@@ -323,6 +376,17 @@ def getVarianceAnsers():
             answers[i][j] /= len(entries)
     return answers
 
+def sort2Arrays(arr1,arr2):
+    for i in range(1,len(arr1)):
+        if arr1[i] < arr1[i-1]:
+            aux = arr1[i]
+            arr1[i] = arr1[i-1]
+            arr1[i-1] = aux
+            aux = arr2[i]
+            arr2[i] = arr2[i - 1]
+            arr2[i - 1] = aux
+    return arr1,arr2
+
 for line in Lines:
 
     count += 1
@@ -379,23 +443,24 @@ dataBase = DataBase(objectEntries)
 # dataBase.nohIncresesReportedSkillOfPlayer(15)
 # dataBase.genderIncresesReportedSkillOfPlayer()
 #dataBase.ageIncresesReportedSkillOfPlayer()
-#dataBase.linkTwoDataPoints("age","skillPlayer",plotOpt="dot")
-#dataBase.linkOnePointWithArrayAvg("noh","skillPlayer",plotOpt="dot")
+# dataBase.linkOnePointWithArrayAvg("age","skillPlayer",plotOpt="dot")
+# dataBase.linkOnePointWithArrayAvg("noh","skillPlayer",plotOpt="dot")
 # print(getAvgNumber(dataBase.getNPCRemainingHP("10")))
 # print(getAvgNumber(dataBase.getNPCRemainingHP("100")))
 # print(getAvgNumber(dataBase.getNPCRemainingHP("1k")))
-# print(getAvgNumber(dataBase.getNPCRemainingHP("100K")))
-# print(getAvgNumber(dataBase.getNPCRemainingHP("1000K")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("100k")))
+# print(getAvgNumber(dataBase.getNPCRemainingHP("1000k")))
 #
 # print(getAvgNumber(dataBase.getDiffHPatTheEnd("10")))
 # print(getAvgNumber(dataBase.getDiffHPatTheEnd("100")))
 # print(getAvgNumber(dataBase.getDiffHPatTheEnd("1k")))
-# print(getAvgNumber(dataBase.getDiffHPatTheEnd("100K")))
-# print(getAvgNumber(dataBase.getDiffHPatTheEnd("1000K")))
-
-#print(dataBase.linkCriteriasFromAllFights("skillPlayer","measuredSkill"))
-# print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesWonByNPC)))
-# print(len(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC)))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("100k")))
+# print(getAvgNumber(dataBase.getDiffHPatTheEnd("1000k")))
+#
+# print(dataBase.linkCriteriasFromAllFights("skillPlayer","measuredSkill"))
+# print(dataBase.getNPCTime("10",filterNPC.filterMatchesWonByNPC))
+# print(dataBase.getNPCTime("10",filterNPC.filterMatchesLostByNPC))
+#
 # print(dataBase.linkCriteriasFromAllFights("enjoy","measuredSkill"))
 # print(dataBase.linkCriteriasFromAllFights("enjoy","skillPlayer"))
 # print(dataBase.linkOnePointWithArrayAvg("name","human",nameNPC=True,excludeMinus=True))
@@ -405,11 +470,34 @@ dataBase = DataBase(objectEntries)
 # print(dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True))
 # print(dataBase.linkOnePointWithArrayCount("name","defenseNPC",nameNPC=True,countWhat=1))
 # print(dataBase.linkOnePointWithArrayCount("name","defensePlayer",nameNPC=True,countWhat=1))
-print(dataBase.linkOnePointWithArrayCount("name","attacksNPC",nameNPC=True,countWhat=1))
-print(dataBase.linkOnePointWithArrayCount("name","attacksPlayers",nameNPC=True,countWhat=1))
-
-
-
-# print(dataBase.linkTwoDataPoints("gen","skillPlayer"))
-# masterDataAnalyserEntry(43)
+# print(dataBase.linkOnePointWithArrayCount("name","attacksNPC",nameNPC=True,countWhat=1))
+# print(dataBase.linkOnePointWithArrayCount("name","attacksPlayers",nameNPC=True,countWhat=1))
+# print(dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","skillPlayer",nameNPC=True,excludeMinus=True))
+# print(dataBase.linkOnePointWithArrayAvg("name","skillRelative",nameNPC=True,excludeMinus=True))
+#
+# npcNames, attkData = dataBase.linkOnePointWithArrayAvg("name","skillAttack",nameNPC=True,excludeMinus=True)
+# npcNames, moveData = dataBase.linkOnePointWithArrayAvg("name","skillMove",nameNPC=True,excludeMinus=True)
+# npcNames, defendData = dataBase.linkOnePointWithArrayAvg("name","skillDefend",nameNPC=True,excludeMinus=True)
+#
+# plotBarMultipleColors([attkData,moveData,defendData],"Reported Skill", ["attack","move","defend"], xTicksLabels=npcNames)
+# #plotBar()
+# npcNames, skillNPC = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True)
+# npcNames, skillPlayer = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True)
+#
+# plotBarMultipleColors([skillNPC,skillPlayer],"Competitor Skill", ["skill NPC","skill Player"], xTicksLabels=npcNames)
+#
+# # playersPlayingALot = dataBase.filterBy("noh",">=",15)
+#
+# # for npc in dataBase.NPCs:
+# #     presenceNPCs = dataBase.getSubsetCritBy([npc],"participant")
+# #
+# #     NPCFightPlayerNoh = dataBase.filterSubsetBy(presenceNPCs[0],"identity", "==", playersPlayingALot)
+# #
+# matchOrd,grade = dataBase.participants[36].getComparisonNPCAnalysis()
+# print(matchOrd,grade)
+# # print(dataBase.linkOnePointWithArrayAvg("gen","skillPlayer"))
+# # masterDataAnalyserEntry(43)
 # NPCDataAnalyser(entries)
+for i in range(0,len(entries)):
+    plotFights(i)

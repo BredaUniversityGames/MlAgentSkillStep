@@ -7,7 +7,7 @@ class NPC:
     def __init__(self,name,participants):
         self.name = name
         self.presences = []
-        self.critDictionary = {"name":self.name}
+        self.critDictionary = {"name":self.name, "presences":self.presences}
         for participant in participants:
             result = participant.getNPCDetails(name)
             if result != False:
@@ -16,10 +16,13 @@ class NPC:
     def getCriteria(self, fromCrit):
         if fromCrit in self.critDictionary.keys():
             return self.critDictionary[fromCrit]
+        elif fromCrit in self.presences[0].critDictionary.keys():
+            return [presence.critDictionary[fromCrit] for presence in self.presences]
         elif fromCrit in self.presences[0].quiz.critDictionary.keys():
             return [presence.quiz.critDictionary[fromCrit] for presence in self.presences]
         elif fromCrit in self.presences[0].fight.critDictionary.keys():
             return [presence.fight.critDictionary[fromCrit] for presence in self.presences]
+
         raise Exception("unknown keyword criteria")
 
     def getWins(self):
@@ -59,6 +62,12 @@ class NPC:
                 aggregTime.append(presence.fight.durationFrames)
         return aggregTime
 
+    def getPresencesByFilter(self,filter):
+        aggreg = []
+        for presence in self.presences:
+            if filter(None, presence):
+                aggreg.append(presence)
+        return aggreg
 class filterNPC:
     def filterMatchesWonByNPC(self,presence):
         return presence.fight.whoWon == 0

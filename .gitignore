@@ -4,5 +4,6 @@
 .idea/
 build/
 dist/
+Plots/
 main.exe
 main.spec

@@ -1,3 +1,5 @@
+import copy
+
 from FightMatch import FightMatch
 from Quiz import Quiz
 
@@ -25,6 +27,8 @@ class Participant:
         self.comparisonNPC = entry[2]
 
     def getCriteria(self,fromCrit):
+        if fromCrit == "identity":
+            return self
         if fromCrit in self.critDictionary.keys():
             return self.critDictionary[fromCrit]
         elif fromCrit in self.answers[0].critDictionary.keys():
@@ -74,3 +78,17 @@ class Participant:
 
         return dataPackNPC
 
+    def getComparisonNPCAnalysis(self):
+        gradeComparison = []
+        print(self.comparisonNPC)
+        for i in range(1,len(self.matchOrder)):
+            if self.matchOrder[i-1] > self.matchOrder[i]: #if the last NPC was trained more than current NPC
+                if self.comparisonNPC[i] == 0:
+                    gradeComparison.append(1)
+                if self.comparisonNPC[i] == 1:
+                    gradeComparison.append(0)
+                if self.comparisonNPC[i] == 2:
+                    gradeComparison.append(-1)
+            else:#if the last NPC was trained less than current NPC
+                gradeComparison.append(self.comparisonNPC[i]-1)
+        return copy.deepcopy(self.matchOrder), gradeComparison

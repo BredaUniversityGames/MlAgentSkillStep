@@ -56,25 +56,44 @@ class DataBase:
         if operator == ">":
             return param > amount
         if operator == "==":
+            if isinstance(amount,list):
+                for entity in amount:
+
+                    if param == entity:
+                        return True
+                return False
             return param == amount
         raise "no such operator defined"
 
-    def filterEntriesBy(self, fromCrit, operator=None, amount=None):
+    def filterBy(self, fromCrit, operator=None, amount=None, nameNPC= None):
         newList = []
-        for participant in self.participants:
-            if self.operatorFunction(participant.getCriteria(fromCrit), operator, amount):
-                newList.append(participant)
+        dataPool = self.participants
+        if nameNPC is not None:
+            if nameNPC != True:
+                for npc in self.NPCs:
+                    if npc.name == nameNPC:
+                        dataPool = [npc]
+            else:
+                dataPool = self.NPCs
+
+        for dataEntry in dataPool:
+            if self.operatorFunction(dataEntry.getCriteria(fromCrit), operator, amount):
+                newList.append(dataEntry)
+        return newList
+
+    def getSubsetCritBy(self, subset, fromCrit, operator=None, amount=None, nameNPC= None):
+        newList = []
+        for dataEntry in subset:
+            result = dataEntry.getCriteria(fromCrit)
+            if self.operatorFunction(result, operator, amount):
+                newList.append(result)
         return newList
 
     def filterSubsetBy(self,subset, fromCrit, operator=None, amount=None):
         newList = []
-        if operator is None:
-            for participant in subset:
-                newList += participant.getCriteria(fromCrit)
-        else:
-            for participant in subset:
-                if self.operatorFunction(participant.getCriteria(fromCrit), operator, amount):
-                    newList.append(participant)
+        for dataEntry in subset:
+            if self.operatorFunction(dataEntry.getCriteria(fromCrit), operator, amount):
+                newList.append(dataEntry)
         return newList
 
     def nohIncresesReportedSkillOfPlayer(self,noh):
