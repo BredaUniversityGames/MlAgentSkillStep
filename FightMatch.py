@@ -5,12 +5,11 @@ class FightMatch:
         self.NPC = dataEntry[0][0]
         self.whoWon = dataEntry[0][1]
         self.durationFrames = dataEntry[0][2]
-        self.durationSec = dataEntry[0][2]/30
+        self.durationSec = len(dataEntry[1])  #dataEntry[0][2]/30
         self.hpNPC = dataEntry[1]
         self.hpPlayer = dataEntry[2]
         self.apsPlayer = dataEntry[3]
         self.hpDiff = []
-
 
         if self.whoWon == 0:
             self.hpNPC.append(self.hpNPC[len(self.hpNPC)-1])
@@ -23,9 +22,13 @@ class FightMatch:
         self.endHP = self.hpDiff[len(self.hpDiff)-1]
         self.endHPofNPC = self.hpNPC[len(self.hpNPC)-1]
         self.endHPofPlayer = self.hpPlayer[len(self.hpPlayer) - 1]
-        self.critDictionary = {"measuredSkill": self.endHP, "attacksPlayers":self.getPlayerAttacksToNPC(),
+        self.critDictionary = {"time":self.durationSec,"measuredSkill": self.endHP, "attacksPlayers":self.getPlayerAttacksToNPC(),
                                "attacksNPC": self.getNPCAttacksToPlayer(),"defensePlayer": self.getPlayerDefense(),
-                               "defenseNPC": self.getNPCDefense()}
+                               "defenseNPC": self.getNPCDefense(), "totalDmgDoneToNPC":176-self.endHPofNPC, "totalDmgDoneToPlayer":176-self.endHPofPlayer, "hpDiff":self.hpDiff}
+
+    def getCriteria(self, fromCrit):
+        if fromCrit in self.critDictionary.keys():
+            return self.critDictionary[fromCrit]
 
     def getHPdiffOverTime(self):
         for second in range(0,len(self.hpNPC)):
@@ -75,3 +78,4 @@ class FightMatch:
                 defenseList.append(1)
             else: defenseList.append(0)
         return defenseList
+

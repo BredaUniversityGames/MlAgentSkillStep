@@ -50,15 +50,31 @@ class DataBase:
         if operator == "<":
             return param < amount
         if operator == "<=":
+            if isinstance(param, list):
+                for entity in param:
+                    if entity <= amount:
+                        return True
+                return False
             return param <= amount
+        if operator == "!=":
+            if isinstance(param, list):
+                for entity in param:
+                    if entity != amount:
+                        return True
+                return False
+            return param != amount
         if operator == ">=":
+            if isinstance(param, list):
+                for entity in param:
+                    if entity >= amount:
+                        return True
+                return False
             return param >= amount
         if operator == ">":
             return param > amount
         if operator == "==":
             if isinstance(amount,list):
                 for entity in amount:
-
                     if param == entity:
                         return True
                 return False
@@ -112,7 +128,7 @@ class DataBase:
         print("avg Skill for gender Male"  + " : " + str(getAvgNumber(skillPlayersM)))
         print("avg Skill for gender Female "  + " : " + str(getAvgNumber(skillPlayersF)))
 
-    def linkOnePointWithArrayAvg(self, criteria1,criteria2, nameNPC=None, plotOpt=None, excludeMinus=False):
+    def linkOnePointWithArrayAvg(self, criteria1,criteria2, nameNPC=None, plotOpt=None, excludeMinus=False, Avg=True):
         #links a general point to an average
 
         criteria1Pool ,criteria2Linked = self.linkBetween(criteria1,criteria2,nameNPC)
@@ -120,7 +136,8 @@ class DataBase:
         for criteria2Index in range(0,len(criteria2Linked)):
             if excludeMinus:
                 criteria2Linked[criteria2Index] = deleteFromList(criteria2Linked[criteria2Index],-1)
-            criteria2Linked[criteria2Index] = getAvgNumber(criteria2Linked[criteria2Index])
+            if Avg:
+                criteria2Linked[criteria2Index] = getAvgNumber(criteria2Linked[criteria2Index])
 
         if plotOpt == "dot":
             dotPlot(criteria1Pool,criteria2Linked,criteria1,criteria2)
@@ -198,6 +215,45 @@ class DataBase:
     def getNPCTime(self,nameNPC,filter):
         return self.NPCs[self.npcNamesDict[nameNPC]].getNPCTime(filter)
 
+    def getRoundsInOrderOfExperiencingRounds(self,round1,round2,crit):
+        round1List = []
+        round2List = []
+        fights = self.getSubsetCritBy(self.participants,"fightsOrdered")
+        for rounds in fights:
+            round1List.append(rounds[round1].getCriteria(crit))
+            round2List.append(rounds[round2].getCriteria(crit))
+        return round1List,round2List
+
+    def getRounds(self,round1,round2,crit):
+        round1List = []
+        round2List = []
+        fights = self.getSubsetCritBy(self.participants,"fightsNPC")
+        for rounds in fights:
+            round1List.append(rounds[round1].getCriteria(crit))
+            round2List.append(rounds[round2].getCriteria(crit))
+        return round1List,round2List
+
+    def getAnswers(self,round1,round2,crit):
+        quiz1List = []
+        quiz2List = []
+        answers = self.getSubsetCritBy(self.participants, "answersOrdered")
+        for quizes in answers:
+            quiz1List.append(quizes[round1].getCriteria(crit))
+            quiz2List.append(quizes[round2].getCriteria(crit))
+        return quiz1List, quiz2List
+    def getAnswersInOrderOfNPCSs(self,round1,round2,crit):
+        quiz1List = []
+        quiz2List = []
+        answers = self.getSubsetCritBy(self.participants, "answersNPC")
+        for quizes in answers:
+            quiz1List.append(quizes[round1].getCriteria(crit))
+            quiz2List.append(quizes[round2].getCriteria(crit))
+        return quiz1List, quiz2List
+    def getHowManyGamesThePlayerWon(self,participants):
+        roundsWon = []
+        for participant in participants:
+            roundsWon.append(participant.getGamesWonByParticipant())
+        return roundsWon
 
 
 def deleteFromList(listOld, item):

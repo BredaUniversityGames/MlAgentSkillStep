@@ -17,5 +17,9 @@ class Quiz:
         self.skillNPCtoPrevNPC = dataEntry[13]
         self.critDictionary = {"enjoy": self.enjoy, "skillNPC": self.skillNPC, "skillPlayer": self.skillPlayer,
                                "skillRelative": self.skillRelative, "skillAttack": self.skillAttack, "skillMove": self.skillMove, "skillDefend": self.skillDefend,
-                               "passiveAggressive": self.passiveAggressive, "self.riposte": self.riposte, "delayed":self.delayed, "human":self.human, "predictable":self.predictable, "exploitable":self.exploitable, "skillNPCtoPrevNPC":self.skillNPCtoPrevNPC}
+                               "passiveAggressive": self.passiveAggressive, "riposte": self.riposte, "delayed":self.delayed, "human":self.human,
+                               "predictable":self.predictable, "exploitable":self.exploitable, "skillNPCtoPrevNPC":self.skillNPCtoPrevNPC}
 
+    def getCriteria(self, fromCrit):
+        if fromCrit in self.critDictionary.keys():
+            return self.critDictionary[fromCrit]

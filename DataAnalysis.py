@@ -7,6 +7,9 @@ import numpy as np
 from DataBase import DataBase
 from NPC import filterNPC
 from Participant import Participant
+from scipy import stats
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
 savePlots = True
 
@@ -17,6 +20,7 @@ NPCDataExplained = ["Matches won/lost","All times per match","Avg time per match
 roundsAnchorman = ["-1st Round", "-2nd Round","-3rd Round","-4th Round","-5th Round"]
 wonLossAnchorman = ["won","lost"]
 entryNrLines = 22
+alpha = 0.05
 entries = []
 objectEntries = []
 count = -1
@@ -38,7 +42,7 @@ populationExp = 0
 
 
 def nohFilter(entry):
-    return entry<15
+    return entry>2
 
 def dotPlot(dataX,dataY,xlabel,ylabel):
     plt.plot(dataX,dataY,'o')
@@ -158,23 +162,27 @@ def plotBar():
     plt.yticks()
     plt.show()
 
-def plotBarMultipleColors(data, nameOfData, labels, yTicks=None, xTicksLabels=None):
+def plotBarMultipleColors(data, nameOfData, labels, yTicks=None, xTicksLabels=None, error=None):
     mpl.style.use('default')
     X = np.arange(len(data[0]))
     fig = plt.figure()
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
 
-    ax.bar(X - 0.25, data[0], color='b', width=0.25)
-    ax.bar(X + 0.00, data[1], color='g', width=0.25)
+    ax.bar(X - 0.25, data[0], yerr=error[0], color='m', width=0.25, error_kw=dict(lw=1, capsize=5, capthick=1))
+    ax.bar(X + 0.00, data[1], yerr=error[1], color='c', width=0.25, error_kw=dict(lw=1, capsize=5, capthick=1))
     if (len(data)>2):
-        ax.bar(X + 0.25, data[2], color='r', width=0.25)
+        ax.bar(X + 0.25, data[2], yerr=error[2],color='y', width=0.25, error_kw=dict(lw=1, capsize=5, capthick=1))
     if (len(data) > 3): raise Exception("data size too big")
     ax.set_title(nameOfData)
     ax.set_xticks(X,xTicksLabels)
-    ax.set_yticks(np.arange(0, 7.5, 0.5))
+    ax.set_yticks(np.arange(0, 6.5, 0.5))
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    plt.xlabel('NPCs')
+    plt.ylabel('Rating')
     ax.legend(labels=labels)
     # fig.suptitle("hello")
-    plt.show()
+    showOrSavePlot(nameOfData)
 
 def getAvgNumber(data):
     howMany = len(data)
@@ -282,10 +290,10 @@ def masterDataAnalyserEntry(entryNo):
 def showOrSavePlot(namePlt=None):
     global savePlots
     if savePlots:
-        namePlt = namePlt.split(":")
-        nameNPC = namePlt[1]
-        namePlt = namePlt[0]
-        plt.savefig("Plots/NPC-"+nameNPC+"/"+namePlt+nameNPC+".png")
+        # namePlt = namePlt.split(":")
+        # nameNPC = namePlt[1]
+        # namePlt = namePlt[0]
+        plt.savefig("Plots/"+namePlt+".png")
         plt.close()
     else:
         plt.show()
@@ -328,6 +336,16 @@ def plotAnswers(entryNo,numberOfEntries=1,question=None):
         index+=1
         for fight in answer[1]:
             print(fight)
+
+def plotHistogram(data, xlabel, ylabel, title, binsDensity = 3):
+    plt.hist(data, color='blue', edgecolor='black',
+             bins=int(len(data) / binsDensity))
+
+    # Add labels
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    showOrSavePlot(title)
 
 def printParticipantsData(entryNo,numberOfEntries=1):
     answers = entries[entryNo:entryNo+numberOfEntries]
@@ -439,7 +457,7 @@ dataBase = DataBase(objectEntries)
 
 # printParticipantsData(43,1)
 #print(getVarianceAnsers())
-# populationDemographics(entries)
+#populationDemographics(entries)
 # dataBase.nohIncresesReportedSkillOfPlayer(15)
 # dataBase.genderIncresesReportedSkillOfPlayer()
 #dataBase.ageIncresesReportedSkillOfPlayer()
@@ -476,17 +494,46 @@ dataBase = DataBase(objectEntries)
 # print(dataBase.linkOnePointWithArrayAvg("name","skillPlayer",nameNPC=True,excludeMinus=True))
 # print(dataBase.linkOnePointWithArrayAvg("name","skillRelative",nameNPC=True,excludeMinus=True))
 #
-# npcNames, attkData = dataBase.linkOnePointWithArrayAvg("name","skillAttack",nameNPC=True,excludeMinus=True)
-# npcNames, moveData = dataBase.linkOnePointWithArrayAvg("name","skillMove",nameNPC=True,excludeMinus=True)
-# npcNames, defendData = dataBase.linkOnePointWithArrayAvg("name","skillDefend",nameNPC=True,excludeMinus=True)
+# npcNames, attkData = dataBase.linkOnePointWithArrayAvg("name","skillAttack",nameNPC=True,excludeMinus=True,Avg=False)
+# npcNames, moveData = dataBase.linkOnePointWithArrayAvg("name","skillMove",nameNPC=True,excludeMinus=True,Avg=False)
+# npcNames, defendData = dataBase.linkOnePointWithArrayAvg("name","skillDefend",nameNPC=True,excludeMinus=True,Avg=False)
+# #
 #
-# plotBarMultipleColors([attkData,moveData,defendData],"Reported Skill", ["attack","move","defend"], xTicksLabels=npcNames)
-# #plotBar()
-# npcNames, skillNPC = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True)
-# npcNames, skillPlayer = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True)
+# attkDataErr = []
+# moveDataErr = []
+# defendDataErr = []
+# for i in attkData:
+#     attkDataErr.append(np.std(i))
+# for i in moveData:
+#     moveDataErr.append(np.std(i))
+# for i in attkData:
+#     defendDataErr.append(np.std(i))
+# print(attkDataErr,moveDataErr,defendDataErr)
+# for i in range(0,5):
+#     attkData[i] = np.mean(attkData[i])
+#     moveData[i] = np.mean(moveData[i])
+#     defendData[i] = np.mean(defendData[i])
 #
-# plotBarMultipleColors([skillNPC,skillPlayer],"Competitor Skill", ["skill NPC","skill Player"], xTicksLabels=npcNames)
 #
+# plotBarMultipleColors([attkData,moveData,defendData],"Reported Skill", ["attack","move","defend"], xTicksLabels=npcNames, error=[attkDataErr,moveDataErr,defendDataErr])
+#plotBar()
+# npcNames, skillNPC = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True,Avg=False)
+# npcNames, skillPlayer = dataBase.linkOnePointWithArrayAvg("name","skillPlayer",nameNPC=True,excludeMinus=True,Avg=False)
+#
+#
+# skillNPCErr = []
+# skillPlayerErr = []
+# for i in skillNPC:
+#     skillNPCErr.append(np.std(i))
+# for i in skillPlayer:
+#     skillPlayerErr.append(np.std(i))
+# print(skillNPCErr)
+# for i in range(0,5):
+#     skillNPC[i] = np.mean(skillNPC[i])
+#     skillPlayer[i] = np.mean(skillPlayer[i])
+#
+# plotBarMultipleColors([skillNPC,skillPlayer],"Competitor Skill", ["skill NPC","skill Player"], xTicksLabels=npcNames, error=[skillNPCErr,skillPlayerErr] )
+
 # # playersPlayingALot = dataBase.filterBy("noh",">=",15)
 #
 # # for npc in dataBase.NPCs:
@@ -499,5 +546,186 @@ dataBase = DataBase(objectEntries)
 # # print(dataBase.linkOnePointWithArrayAvg("gen","skillPlayer"))
 # # masterDataAnalyserEntry(43)
 # NPCDataAnalyser(entries)
-for i in range(0,len(entries)):
-    plotFights(i)
+# allNPCs = dataBase.getSubsetCritBy(dataBase.participants,"fights")
+#
+# baseline, round1 = dataBase.getRounds(0,1,"measuredSkill")
+# # plotHistogram(baseline,"Measured Skill","Fights", "Distribution of Measured skill for NPC 10")
+# # plotHistogram(round1,"Measured Skill","Fights", "Distribution of Measured skill for NPC 100")
+# round2, round3 = dataBase.getRounds(2,3,"measuredSkill")
+# round3, round5 = dataBase.getRounds(3,4,"measuredSkill")
+
+# npcNames, timeNPC = dataBase.linkOnePointWithArrayAvg("name","whoWon",nameNPC=True,excludeMinus=True,Avg=False)
+#
+# npcWinPerc = []
+# for i in timeNPC:
+#     npcWin = 0
+#     for j in i:
+#         if j==0:
+#             npcWin+=1
+#     npcWin = npcWin * 100/len(i)
+#     npcWinPerc.append(npcWin)
+#     print(npcWin)
+# npcNames, skillNPC = dataBase.linkOnePointWithArrayAvg("name","skillNPC",nameNPC=True,excludeMinus=True,Avg=False)
+# npcNames, skillMeasuredNPC = dataBase.linkOnePointWithArrayAvg("name","measuredSkill",nameNPC=True,excludeMinus=True,Avg=False)
+#
+#
+# skillNPCErr = []
+# skillMeasuredNPCErr = []
+# for i in skillNPC:
+#     skillNPCErr.append(np.std(i))
+# for i in skillMeasuredNPC:
+#     skillMeasuredNPCErr.append(np.std(i))
+# print(skillNPCErr)
+# for i in range(0,5):
+#     skillNPC[i] = np.mean(skillNPC[i])
+#     skillMeasuredNPC[i] = np.mean(skillMeasuredNPC[i])
+#     skillMeasuredNPC[i] = skillMeasuredNPC[i] / (352/7) + 3 #get it at the level of the rating (total HP deviation devided by the scale)
+#     skillMeasuredNPCErr[i] = skillMeasuredNPCErr[i] / (352/7)
+#
+# print()
+# plotBarMultipleColors([skillMeasuredNPC, skillNPC],"Measured vs Reported Skill Of NPCs", ["Measured Skill", "Reported Skill"], xTicksLabels= npcNames, error=[skillMeasuredNPCErr, skillNPCErr])
+
+# plotBarMultipleColors([skillMeasuredNPC, skillNPC],"Measured vs Reported Skill Of NPCs", ["Measured Skill", "Reported Skill"], xTicksLabels= npcNames)
+
+# plotHistogram(round2,"Measured Skill","Fights", "Distribution of Measured skill for NPC 1k")
+# plotHistogram(round3,"Measured Skill","Fights", "Distribution of Measured skill for NPC 100k")
+# plotHistogram(round5,"Measured Skill","Fights", "Distribution of Measured skill for NPC 1000k")
+# baseline, round1 = dataBase.getAnswersInOrderOfNPCSs(0,1,"skillNPC")
+#
+# # plotHistogram(baseline,"Reported Skill","Fights", "Distribution of Reported skill for NPC 10",4)
+# # plotHistogram(round1,"Reported Skill","Fights", "Distribution of Reported skill for NPC 100",4)
+# round2, round3 = dataBase.getAnswersInOrderOfNPCSs(2,3,"skillNPC")
+# round3, round4 = dataBase.getAnswersInOrderOfNPCSs(3,4,"skillNPC")
+#
+# plotHistogram(round2,"Reported Skill","Fights", "Distribution of Reported skill for NPC 1k",4)
+# plotHistogram(round3,"Reported Skill","Fights", "Distribution of Reported skill for NPC 100k",4)
+# plotHistogram(round4,"Reported Skill","Fights", "Distribution of Reported skill for NPC 1000k",4)
+# baseline, round1 = dataBase.getRounds(0,1,"measuredSkill")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getRounds(0,2,"measuredSkill")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getRounds(0,3,"measuredSkill")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getRounds(0,4,"measuredSkill")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getRoundsInOrderOfExperiencingRounds(2,4,"measuredSkill")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getRoundsInOrderOfExperiencingRounds(0,4,"totalDmgDoneToPlayer")
+# t_value,p_value=stats.ttest_ind(baseline,round1,equal_var=False)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getAnswersInOrderOfExperiencingRounds(0,1,"skillNPC")
+# t_value,p_value=stats.ttest_ind(baseline,round1)
+# print(t_value)
+# print(p_value)
+# baseline, round1 = dataBase.getAnswersInOrderOfNPCSs(0,4,"skillNPC")
+# t_value,p_value=stats.ttest_ind(baseline,round1)
+# print(t_value)
+# print(p_value)
+
+
+
+#ANOVA TEST skill for all
+# fvalue, pvalue = stats.f_oneway(baseline, round1, round2, round3,round4)
+# print(fvalue, pvalue)
+# fvalue, pvalue = stats.f_oneway(attkData[0],attkData[1],attkData[2],attkData[3],attkData[4])
+# print(fvalue, pvalue)
+# fvalue, pvalue = stats.f_oneway(moveData[0],moveData[1],moveData[2],moveData[3],moveData[4])
+# print(fvalue, pvalue)
+# fvalue, pvalue = stats.f_oneway(defendData[0],defendData[1],defendData[2],defendData[3],defendData[4])
+# print(fvalue, pvalue)
+
+# experiencedParticipants = dataBase.filterBy("exp","==","true")
+#
+# wonOneFightPlus = dataBase.filterSubsetBy(experiencedParticipants,"gamePerformance","<=",0)
+#
+# gamesWon = dataBase.getHowManyGamesThePlayerWon(wonOneFightPlus)
+# print(np.mean(gamesWon))
+#
+# inexperiencedParticipants = dataBase.filterBy("exp","!=","true")
+#
+# print(len(inexperiencedParticipants))
+# inExpWonOneFightPlus = dataBase.filterSubsetBy(inexperiencedParticipants,"gamePerformance","<=",0)
+#
+# inExpGamesWon = dataBase.getHowManyGamesThePlayerWon(inExpWonOneFightPlus)
+# print(inExpGamesWon)
+# print(np.mean(inExpGamesWon))
+# #
+# won3Plus = dataBase.filterSubsetBy(dataBase.participants,"getGamesWonByParticipant",">=",3)
+# print(len(won3Plus))
+# aps = dataBase.getSubsetCritBy(won3Plus,"getAPS")
+# del aps[0:2]
+# time = dataBase.getSubsetCritBy(won3Plus,"hpDiff")
+# apsMean = []
+# for i in aps:
+#     playerMean = []
+#     for j in i:
+#         playerMean.append(np.mean(j))
+#     apsMean.append(np.mean(playerMean))
+#
+# print(np.mean(apsMean))
+# timeMean = []
+# for i in time:
+#     playerMean = []
+#     for j in i:
+#         playerMean.append(np.mean(j))
+#     timeMean.append(np.mean(playerMean))
+#
+# print(np.mean(timeMean))
+#
+#
+# won2Less = dataBase.filterSubsetBy(dataBase.participants,"getGamesWonByParticipant","<=",2)
+# print(len(won2Less))
+# aps = dataBase.getSubsetCritBy(won2Less,"getAPS")
+# del aps[0:3]
+# time = dataBase.getSubsetCritBy(won2Less,"time")
+# apsMean = []
+# for i in aps:
+#     playerMean = []
+#     for j in i:
+#         playerMean.append(np.mean(j))
+#     apsMean.append(np.mean(playerMean))
+# print(np.mean(apsMean))
+# timeMean = []
+# print(time)
+# for i in time:
+#     playerMean = []
+#     for j in i:
+#         playerMean.append(np.mean(j))
+#     timeMean.append(np.mean(playerMean))
+#
+# print(np.mean(timeMean))
+
+# enjoyment = dataBase.getSubsetCritBy(dataBase.participants,"enjoy",">=",4)
+# print(len(enjoyment))
+# print(np.mean(enjoyment))
+npcNames, skillNPC = dataBase.linkOnePointWithArrayAvg("name","predictable",nameNPC=True,excludeMinus=True,Avg=False)
+npcNames, skillMeasuredNPC = dataBase.linkOnePointWithArrayAvg("name","riposte",nameNPC=True,excludeMinus=True,Avg=False)
+npcNames, delayed = dataBase.linkOnePointWithArrayAvg("name","exploitable",nameNPC=True,excludeMinus=True,Avg=False)
+
+skillNPCErr = []
+skillMeasuredNPCErr = []
+skillDelayErr = []
+for i in skillNPC:
+    skillNPCErr.append(np.std(i))
+for i in skillMeasuredNPC:
+    skillMeasuredNPCErr.append(np.std(i))
+for i in delayed:
+    skillDelayErr.append(np.std(i))
+print(skillNPCErr)
+for i in range(0,5):
+    skillNPC[i] = np.mean(skillNPC[i])
+    skillMeasuredNPC[i] = np.mean(skillMeasuredNPC[i])
+    delayed[i] = np.mean(delayed[i])
+plotBarMultipleColors([skillMeasuredNPC, skillNPC , delayed],"Other attributes Of NPCs", ["Predictable", "Riposte", "Exploitable"], xTicksLabels= npcNames, error=[skillMeasuredNPCErr, skillNPCErr, skillDelayErr])
+

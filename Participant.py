@@ -18,13 +18,18 @@ class Participant:
         self.fps = float(entry[0][9])
         self.answers = []
         self.fights = []
-        self.critDictionary = {"age": self.age, "gen": self.gender, "nat": self.nation,
-                               "etn": self.ethnic, "edu": self.education, "noh": self.noh, "exp": self.experience, "tut": self.tutorial, "fps":self.fps}
         for i in range(0,5):
             self.answers.append(Quiz(entry[1][i]))
             self.fights.append(FightMatch(entry[4][i]))
         self.matchOrder = entry[3]
         self.comparisonNPC = entry[2]
+        self.critDictionary = {"age": self.age, "gen": self.gender, "nat": self.nation,
+                               "etn": self.ethnic, "edu": self.education, "noh": self.noh, "exp": self.experience, "tut": self.tutorial,
+                               "fps":self.fps, "fightsOrdered":self.getFightsInOrder(),"fightsNPC":self.fights,
+                               "answersOrdered": self.answers, "answersNPC":self.getAnswersInTrainingOrder(),
+                               "gamePerformance":self.getGamesPerformance(), "getTime":self.getGamesDuration(),
+                               "getGamesWonByParticipant": self.getGamesWonByParticipant(), "getAPS":self.getAPS()}
+
 
     def getCriteria(self,fromCrit):
         if fromCrit == "identity":
@@ -35,6 +40,7 @@ class Participant:
             return [quiz.critDictionary[fromCrit] for quiz in self.answers]
         elif fromCrit in self.fights[0].critDictionary.keys():
             return [fight.critDictionary[fromCrit] for fight in self.fights]
+
 
     def toString(self):
         print("name " + str(self.name))
@@ -92,3 +98,41 @@ class Participant:
             else:#if the last NPC was trained less than current NPC
                 gradeComparison.append(self.comparisonNPC[i]-1)
         return copy.deepcopy(self.matchOrder), gradeComparison
+
+    def getFightsInOrder(self):
+        orderedFights = []
+        for i in self.matchOrder:
+            orderedFights.append(self.fights[i-1])
+        return orderedFights
+
+    def getAnswersInTrainingOrder(self): # 1 3 4 5 2
+        orderedAnswers = [0,0,0,0,0]
+        for i in range(0,len(self.matchOrder)):
+            orderedAnswers[self.matchOrder[i]-1] = self.answers[i]
+        return orderedAnswers
+
+    def getGamesPerformance(self):
+        orderedAnswers = [0, 0, 0, 0, 0]
+        orderedFights = self.getFightsInOrder()
+        for i in range(0, 5):
+            orderedAnswers[i] = orderedFights[i].endHP
+        return orderedAnswers
+
+    def getGamesWonByParticipant(self):
+        orderedAnswers = 0
+        for fight in self.fights:
+            if fight.whoWon == 1:
+                orderedAnswers+=1
+        return orderedAnswers
+
+    def getAPS(self):
+        orderedAnswers = []
+        for fight in self.fights:
+            orderedAnswers.append(fight.apsPlayer)
+        return orderedAnswers
+
+    def getGamesDuration(self):
+        durations = []
+        for fight in self.fights:
+            durations.append(fight.durationSec)
+        return durations
